@@ -49,10 +49,8 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Rendering
-// (Your code clears your framebuffer, renders your other stuff etc.)
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        // (Your code calls glfwSwapBuffers() etc.)
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
