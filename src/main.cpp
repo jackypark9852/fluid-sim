@@ -1,4 +1,4 @@
-#include <GLFW/glfw3.h>
+#include <GLFW/glfw3.h> 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -13,6 +13,7 @@ int main(void)
 
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+
     if (!window)
     {
         glfwTerminate();
