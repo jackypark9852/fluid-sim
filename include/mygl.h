@@ -5,6 +5,7 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "shaderprogram.h"
 
 class MyGL
 {
@@ -15,6 +16,8 @@ private:
 	GLFWwindow* window; 
 	ImGuiContext* imguiContext;
 	GLuint vao; 
+
+	ShaderProgram overlayShader; 
 
 public: 
 	// Rule of Three
@@ -53,9 +56,15 @@ public:
 	void CleanUp(); 
 
 	/// <summary>
-	/// 
+	/// Checks whether the OpenGL window should close, typically triggered by user input or system events.
 	/// </summary>
-	/// <returns></returns>
+	/// <returns>True if the window should close, false otherwise.</returns>
 	bool WindowShouldClose();
+
+	/// <summary>
+	/// Initializes the vertex and fragment shaders, compiles them, links them into a shader program, 
+	/// and sets up any required shader variables or attributes.
+	/// </summary>
+	void InitializeShaders();
 };
 

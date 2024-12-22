@@ -39,6 +39,10 @@
     <ClInclude Include="include\mygl.h" />
     <ClInclude Include="include\shaderprogram.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="glsl\overlay.frag.glsl" />
+    <None Include="glsl\overlay.vert.glsl" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

@@ -92,8 +92,8 @@ public:
     /// Utility function that reads the content of a text file.
     /// </summary>
     /// <param name="file">The path to the text file.</param>
-    /// <returns>A pointer to the file's contents as a C-string.</returns>
-    char* textFileRead(const char* file);
+    /// <returns> A String of the file's contents </returns>
+    std::string textFileRead(const char* file);
 
     /// <summary>
     /// Prints the log of any errors that occurred during shader compilation.

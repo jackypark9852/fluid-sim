@@ -5,11 +5,15 @@
 #include "imgui_impl_opengl3.h"
 
 MyGL::MyGL(unsigned int windowWidth, unsigned int windowHeight): 
-	windowWidth(windowWidth), windowHeight(windowHeight) 
+	windowWidth(windowWidth), windowHeight(windowHeight), 
+    window(nullptr), imguiContext(nullptr), vao(0), 
+    overlayShader()
 {}
 
 MyGL::MyGL(const MyGL& other):
-	windowWidth(other.windowWidth), windowHeight(other.windowHeight)
+	windowWidth(other.windowWidth), windowHeight(other.windowHeight), 
+    window(nullptr), imguiContext(nullptr), vao(0),
+    overlayShader()
 {}
 
 MyGL::~MyGL() {
@@ -68,6 +72,8 @@ bool MyGL::InitializeGL() {
     // We have to have a VAO bound in OpenGL 3.2 Core. But if we're not
     // using multiple VAOs, we can just bind one once.
     glBindVertexArray(vao);
+
+    InitializeShaders(); 
 
     // Setup Dear ImGui context (unique per instance)
     IMGUI_CHECKVERSION();
@@ -132,8 +138,15 @@ void MyGL::CleanUp() {
         glfwDestroyWindow(window);
         window = nullptr;
     }
+
+    // Destroy the compiled shaders 
+    overlayShader.Destroy(); 
 }
 
 bool MyGL::WindowShouldClose() {
     return glfwWindowShouldClose(window); 
+}
+
+void MyGL::InitializeShaders() {
+    overlayShader.Create("glsl/overlay.vert.glsl", "glsl/overlay.frag.glsl");
 }
