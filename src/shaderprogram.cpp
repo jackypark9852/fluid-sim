@@ -85,32 +85,52 @@ void ShaderProgram::SetUnifMat4(std::string name, const glm::mat4& m) {
 
 // Sets a 2D vector uniform in the shader program
 void ShaderProgram::SetUnifVec2(std::string name, const glm::vec2& v) {
-    // Implementation here
+    GLuint location = glGetUniformLocation(prog, name.c_str());
+    if (location == -1) {
+        std::cerr << "Warning: Uniform '" << name << "' not found or not used in shader program." << std::endl;
+        return;
+    }
+    glUniform2fv(location, 1, glm::value_ptr(v));
 }
 
 // Sets a 3D vector uniform in the shader program
 void ShaderProgram::SetUnifVec3(std::string name, const glm::vec3& v) {
-    // Implementation here
+    GLuint location = glGetUniformLocation(prog, name.c_str());
+    if (location == -1) {
+        std::cerr << "Warning: Uniform '" << name << "' not found or not used in shader program." << std::endl;
+        return;
+    }
+    glUniform3fv(location, 1, glm::value_ptr(v));
 }
 
 // Sets a floating-point uniform in the shader program
 void ShaderProgram::SetUnifFloat(std::string name, float f) {
-    // Implementation here
+    GLuint location = glGetUniformLocation(prog, name.c_str());
+    if (location == -1) {
+        std::cerr << "Warning: Uniform '" << name << "' not found or not used in shader program." << std::endl;
+        return;
+    }
+    glUniform1f(location, f);
 }
 
 // Sets an integer uniform in the shader program
 void ShaderProgram::SetUnifInt(std::string name, int i) {
-    // Implementation here
+    GLuint location = glGetUniformLocation(prog, name.c_str());
+    if (location == -1) {
+        std::cerr << "Warning: Uniform '" << name << "' not found or not used in shader program." << std::endl;
+        return;
+    }
+    glUniform1i(location, i);
 }
 
 // Sets an integer array uniform in the shader program at a specific offset
 void ShaderProgram::SetUnifArrayInt(std::string name, int offset, int i) {
-    // Implementation here
-}
-
-// Draws the specified drawable object using this shader program
-void ShaderProgram::Draw(const Drawable& drawable) {
-    // Implementation here
+    GLuint location = glGetUniformLocation(prog, name.c_str());
+    if (location == -1) {
+        std::cerr << "Warning: Uniform '" << name << "' not found or not used in shader program." << std::endl;
+        return;
+    }
+    glUniform1iv(location + offset, 1, &i);  // Adjust location by offset
 }
 
 // Utility function that reads the content of a text file

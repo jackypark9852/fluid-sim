@@ -25,6 +25,7 @@ MyGL& MyGL::operator=(const MyGL& other)
 	windowWidth = other.windowWidth; 
 	windowHeight = other.windowHeight;
 	ResetGL(); 
+    return *this; 
 }
 
 bool MyGL::InitializeGL() {
@@ -101,6 +102,10 @@ void MyGL::PaintGL() {
 
     // Example: Show ImGui demo window
     ImGui::ShowDemoWindow();
+
+    overlayShader.useMe(); 
+    glm::vec2 testVec; 
+    overlayShader.SetUnifVec2("u_Dimensions", testVec);
 
     // Clear the screen
     glClear(GL_COLOR_BUFFER_BIT);
