@@ -19,7 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\drawable.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\mygl.cpp" />
+    <ClCompile Include="src\shaderprogram.cpp" />
     <ClCompile Include="thirdParty\imgui-master\imgui.cpp" />
     <ClCompile Include="thirdParty\imgui-master\imgui_demo.cpp" />
     <ClCompile Include="thirdParty\imgui-master\imgui_draw.cpp" />
@@ -30,7 +33,10 @@
     <ClCompile Include="thirdParty\imgui-master\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="drawable.h" />
     <ClInclude Include="include\glm_includes.h" />
+    <ClInclude Include="include\mygl.h" />
+    <ClInclude Include="shaderprogram.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -125,6 +131,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)thirdParty\imgui-master;$(ProjectDir)include</AdditionalIncludeDirectories>
+      <GenerateXMLDocumentationFiles>true</GenerateXMLDocumentationFiles>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -145,6 +152,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)thirdParty\imgui-master;$(ProjectDir)include</AdditionalIncludeDirectories>
+      <GenerateXMLDocumentationFiles>true</GenerateXMLDocumentationFiles>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
