@@ -32,7 +32,7 @@ public:
 	/// <summary>
 	/// Clears the active window and renders scene and UI. 
 	/// </summary>
-	void paintGL(); 
+	void PaintGL(); 
 	
 	/// <summary>
 	/// Called whenever the window is resized. 
@@ -40,22 +40,22 @@ public:
 	/// </summary>
 	/// <param name="windowWidth"> Window width after resizing </param>
 	/// <param name="windowHeight"> Window height after resizing </param>
-	void resizeGL(unsigned int windowWidth, unsigned int windowHeight);
+	void ResizeGL(unsigned int windowWidth, unsigned int windowHeight);
 
 	/// <summary>
 	/// Cleans up and reinitialzes window and context 
 	/// </summary>
-	void resetGL(); 
+	void ResetGL(); 
 
 	/// <summary>
 	/// Cleans up resources related to this window and context
 	/// </summary>
-	void cleanUp(); 
+	void CleanUp(); 
 
 	/// <summary>
 	/// 
 	/// </summary>
 	/// <returns></returns>
-	bool windowShouldClose();
+	bool WindowShouldClose();
 };
 

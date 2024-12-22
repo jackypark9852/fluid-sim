@@ -13,14 +13,14 @@ MyGL::MyGL(const MyGL& other):
 {}
 
 MyGL::~MyGL() {
-	cleanUp(); 
+	CleanUp(); 
 }
 
 MyGL& MyGL::operator=(const MyGL& other) 	
 {
 	windowWidth = other.windowWidth; 
 	windowHeight = other.windowHeight;
-	resetGL(); 
+	ResetGL(); 
 }
 
 bool MyGL::InitializeGL() {
@@ -55,7 +55,7 @@ bool MyGL::InitializeGL() {
         // Retrieve the MyGL instance associated with this window
         MyGL* instance = static_cast<MyGL*>(glfwGetWindowUserPointer(win));
         if (instance) {
-            instance->resizeGL(width, height);
+            instance->ResizeGL(width, height);
         }
     });
 
@@ -84,7 +84,7 @@ bool MyGL::InitializeGL() {
     return true;
 }
 
-void MyGL::paintGL() {
+void MyGL::PaintGL() {
     // Poll for and process events
     glfwPollEvents();
 
@@ -107,19 +107,19 @@ void MyGL::paintGL() {
     glfwSwapBuffers(window);
 }
 
-void MyGL::resizeGL(unsigned int windowWidth, unsigned int windowHeight) {
+void MyGL::ResizeGL(unsigned int windowWidth, unsigned int windowHeight) {
     this->windowWidth = windowWidth; 
     this->windowHeight = windowHeight; 
 
     // TODO: Adjust persp matrix
 }
 
-void MyGL::resetGL() {
-	cleanUp(); 
+void MyGL::ResetGL() {
+	CleanUp(); 
 	InitializeGL(); 
 }
 
-void MyGL::cleanUp() {
+void MyGL::CleanUp() {
     // Terminate ImGui context for this instance (if it exists)
     if (imguiContext) {
         ImGui::SetCurrentContext(imguiContext); // Ensure this instance's context is current
@@ -134,6 +134,6 @@ void MyGL::cleanUp() {
     }
 }
 
-bool MyGL::windowShouldClose() {
+bool MyGL::WindowShouldClose() {
     return glfwWindowShouldClose(window); 
 }
