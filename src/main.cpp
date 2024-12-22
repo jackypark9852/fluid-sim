@@ -10,9 +10,9 @@ int main(void)
     myGL.InitializeGL(); 
 
     /* Loop until the user closes the window */
-    while (!myGL.windowShouldClose())
+    while (!myGL.WindowShouldClose())
     {
-        myGL.paintGL(); 
+        myGL.PaintGL(); 
     }
 
     glfwTerminate();

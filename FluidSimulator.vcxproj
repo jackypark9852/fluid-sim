@@ -34,10 +34,10 @@
     <ClCompile Include="thirdParty\imgui-master\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="drawable.h" />
+    <ClInclude Include="include\drawable.h" />
     <ClInclude Include="include\glm_includes.h" />
     <ClInclude Include="include\mygl.h" />
-    <ClInclude Include="shaderprogram.h" />
+    <ClInclude Include="include\shaderprogram.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
