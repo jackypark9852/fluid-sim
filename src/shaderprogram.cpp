@@ -63,17 +63,24 @@ void ShaderProgram::Create(const char* vertfile, const char* fragfile) {
 
 // Cleans up all GPU resources associated with this shader program
 void ShaderProgram::Destroy() {
-    // Implementation here
+    glDeleteProgram(prog);
+    glDeleteShader(vertShader);
+    glDeleteShader(fragShader);
 }
 
 // Activates this shader program in the OpenGL context for subsequent rendering
 void ShaderProgram::useMe() {
-    // Implementation here
+    glUseProgram(prog); 
 }
 
 // Sets a 4x4 matrix uniform in the shader program
 void ShaderProgram::SetUnifMat4(std::string name, const glm::mat4& m) {
-    // Implementation here
+    GLuint matrix = glGetUniformLocation(prog, name.c_str());
+    if (matrix == -1) {
+        std::cerr << "Warning: Uniform '" << name << "' not found or not used in shader program." << std::endl;
+        return;
+    }
+    glUniformMatrix4fv(matrix, 1, GL_FALSE, glm::value_ptr(m));
 }
 
 // Sets a 2D vector uniform in the shader program
