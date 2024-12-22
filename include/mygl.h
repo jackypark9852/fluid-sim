@@ -1,4 +1,6 @@
 #pragma once
+
+#include <glad/glad.h>
 #include <GLFW/glfw3.h> 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -7,10 +9,12 @@
 class MyGL
 {
 private: 
+	unsigned int windowWidth;
+	unsigned int windowHeight;
+
 	GLFWwindow* window; 
 	ImGuiContext* imguiContext;
-	unsigned int windowWidth; 
-	unsigned int windowHeight; 
+	GLuint vao; 
 
 public: 
 	// Rule of Three

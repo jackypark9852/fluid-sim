@@ -45,6 +45,8 @@ bool MyGL::InitializeGL() {
     // Make the OpenGL context current for this window
     glfwMakeContextCurrent(window);
 
+    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress); 
+
     // Set the user pointer for the window to this instance
     glfwSetWindowUserPointer(window, this);
 
@@ -59,6 +61,13 @@ bool MyGL::InitializeGL() {
 
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
+
+    // Create a Vertex Attribute Object
+    glGenVertexArrays(1, &vao);
+
+    // We have to have a VAO bound in OpenGL 3.2 Core. But if we're not
+    // using multiple VAOs, we can just bind one once.
+    glBindVertexArray(vao);
 
     // Setup Dear ImGui context (unique per instance)
     IMGUI_CHECKVERSION();
