@@ -65,6 +65,6 @@ public:
 	/// Initializes the vertex and fragment shaders, compiles them, links them into a shader program, 
 	/// and sets up any required shader variables or attributes.
 	/// </summary>
-	void InitializeShaders();
+	bool InitializeShaders();
 };
 

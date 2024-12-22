@@ -27,7 +27,7 @@ public:
     /// </summary>
     /// <param name="vertfile">Path to the vertex shader file.</param>
     /// <param name="fragfile">Path to the fragment shader file.</param>
-    void Create(const char* vertfile, const char* fragfile);
+    bool Create(const char* vertfile, const char* fragfile);
 
     /// <summary>
     /// Cleans up all GPU resources associated with this shader program.

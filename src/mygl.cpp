@@ -74,7 +74,10 @@ bool MyGL::InitializeGL() {
     // using multiple VAOs, we can just bind one once.
     glBindVertexArray(vao);
 
-    InitializeShaders(); 
+    if (!InitializeShaders()) {
+        std::cerr << "Shader initialization failed" << std::endl; 
+        exit(1); 
+    }
 
     // Setup Dear ImGui context (unique per instance)
     IMGUI_CHECKVERSION();
@@ -104,8 +107,8 @@ void MyGL::PaintGL() {
     ImGui::ShowDemoWindow();
 
     overlayShader.useMe(); 
-    glm::vec2 testVec; 
-    overlayShader.SetUnifVec2("u_Dimensions", testVec);
+    int test = 3; 
+    overlayShader.SetUnifInt("u_BlockType", test);
 
     // Clear the screen
     glClear(GL_COLOR_BUFFER_BIT);
@@ -152,6 +155,6 @@ bool MyGL::WindowShouldClose() {
     return glfwWindowShouldClose(window); 
 }
 
-void MyGL::InitializeShaders() {
-    overlayShader.Create("glsl/overlay.vert.glsl", "glsl/overlay.frag.glsl");
+bool MyGL::InitializeShaders() {
+    return overlayShader.Create("glsl/overlay.vert.glsl", "glsl/overlay.frag.glsl");
 }

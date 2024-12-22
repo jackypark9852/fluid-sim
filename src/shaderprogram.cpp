@@ -10,7 +10,7 @@ ShaderProgram::ShaderProgram()
 {}
 
 // Compiles and links the vertex and fragment shaders from the specified GLSL files
-void ShaderProgram::Create(const char* vertfile, const char* fragfile) {
+bool ShaderProgram::Create(const char* vertfile, const char* fragfile) {
     // Allocate space on our GPU for a vertex shader and a fragment shader and a shader program to manage the two
     vertShader = glCreateShader(GL_VERTEX_SHADER);
     fragShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -23,7 +23,7 @@ void ShaderProgram::Create(const char* vertfile, const char* fragfile) {
     if (vertSourceStr.empty() || fragSourceStr.empty()) {
         // Handle file reading failure appropriately
         std::cerr << "Failed to read shader source files" << std::endl;
-        return;
+        return false;
     }
 
     const char* vertSource = vertSourceStr.c_str();
@@ -42,10 +42,12 @@ void ShaderProgram::Create(const char* vertfile, const char* fragfile) {
     glGetShaderiv(vertShader, GL_COMPILE_STATUS, &compiled);
     if (!compiled) {
         printShaderInfoLog(vertShader);
+        return false; 
     }
     glGetShaderiv(fragShader, GL_COMPILE_STATUS, &compiled);
     if (!compiled) {
         printShaderInfoLog(fragShader);
+        return false; 
     }
 
     // Tell prog that it manages these particular vertex and fragment shaders
@@ -57,8 +59,11 @@ void ShaderProgram::Create(const char* vertfile, const char* fragfile) {
     GLint linked;
     glGetProgramiv(prog, GL_LINK_STATUS, &linked);
     if (!linked) {
-        printLinkInfoLog(prog);
+        printLinkInfoLog(prog); 
+        return false; 
     }
+
+    return true; 
 }
 
 // Cleans up all GPU resources associated with this shader program
