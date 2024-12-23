@@ -9,5 +9,5 @@
 class Quad : public Drawable {
 public:
     Quad();
-    void createVBOdata() override;
+    void CreateVBOdata() override;
 };

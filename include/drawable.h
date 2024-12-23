@@ -14,7 +14,7 @@ enum BufferType : unsigned char {
     TRANS, INDEXTRANS
 };
 
-// <summary>
+/// <summary>
 /// Abstract class representing a drawable object.
 /// Encapsulates the creation, management, and rendering of GPU buffer objects.
 /// </summary>
@@ -47,39 +47,39 @@ public:
     /// Pure virtual function to create vertex buffer object (VBO) data.
     /// Must be implemented by subclasses to populate buffer data for rendering.
     /// </summary>
-    virtual void createVBOdata() = 0;
+    virtual void CreateVBOdata() = 0;
 
     /// <summary>
     /// Frees the VBO data associated with this Drawable.
     /// Releases GPU resources allocated for buffers.
     /// </summary>
-    virtual void destroyVBOdata();
+    virtual void DestroyVBOdata();
 
     /// <summary>
     /// Retrieves the OpenGL draw mode for this Drawable.
     /// Override in derived classes to specify the appropriate draw mode (e.g., GL_TRIANGLES).
     /// </summary>
     /// <returns>The OpenGL draw mode.</returns>
-    virtual GLenum drawMode();
+    virtual GLenum DrawMode() const;
 
     /// <summary>
     /// Gets the number of elements in the index buffer for the given buffer type.
     /// </summary>
     /// <param name="buf">The buffer type to query.</param>
     /// <returns>The number of elements in the index buffer.</returns>
-    int elemCount(BufferType buf);
+    int ElemCount(BufferType buf) const;
 
     /// <summary>
     /// Generates an OpenGL buffer of the specified type.
     /// Initializes the buffer and updates the internal state of the Drawable.
     /// </summary>
     /// <param name="buf">The type of buffer to generate.</param>
-    void generateBuffer(BufferType buf);
+    void GenerateBuffer(BufferType buf);
 
     /// <summary>
     /// Binds the OpenGL buffer of the specified type to the current context.
     /// </summary>
     /// <param name="buf">The type of buffer to bind.</param>
     /// <returns>True if the buffer was successfully bound; false otherwise.</returns>
-    bool bindBuffer(BufferType buf);
+    bool BindBuffer(BufferType buf) const;
 };

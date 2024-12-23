@@ -21,6 +21,7 @@ private:
 	ShaderProgram overlayShader; 
 
 	Quad quad; /// <summary> A quad that covers the full screen (e.g. background) </summary>
+	GLuint testTextureHandle; /// <summary> The handle for the test texture created in RenderTestTexture() </summary>
 
 public: 
 	// Rule of Three

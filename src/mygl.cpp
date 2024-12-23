@@ -7,13 +7,13 @@
 MyGL::MyGL(unsigned int windowWidth, unsigned int windowHeight): 
 	windowWidth(windowWidth), windowHeight(windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0), 
-    overlayShader(), quad()
+    overlayShader(), quad(), testTextureHandle(-1)
 {}
 
 MyGL::MyGL(const MyGL& other):
 	windowWidth(other.windowWidth), windowHeight(other.windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0),
-    overlayShader(), quad() 
+    overlayShader(), quad(), testTextureHandle(-1)
 {}
 
 MyGL::~MyGL() {
@@ -79,6 +79,9 @@ bool MyGL::InitializeGL() {
         exit(1); 
     }
 
+    // Initialize vbo data for quad
+    quad.CreateVBOdata(); 
+
     // Setup Dear ImGui context (unique per instance)
     IMGUI_CHECKVERSION();
     imguiContext = ImGui::CreateContext();
@@ -104,10 +107,13 @@ void MyGL::PaintGL() {
     ImGui::NewFrame();
 
     // Example: Show ImGui demo window
-    ImGui::ShowDemoWindow();
+    ImGui::ShowDemoWindow();    
 
     // Clear the screen
+    glClearColor(0.9f, 0.9f, 0.9f, 1.0f); 
     glClear(GL_COLOR_BUFFER_BIT);
+
+    RenderTestImage();
 
     // Render ImGui
     ImGui::Render();
@@ -157,5 +163,53 @@ bool MyGL::InitializeShaders() {
 
 void MyGL::RenderTestImage()
 {
+    if (testTextureHandle == -1) {
+        const int textureWidth = 512;
+        const int textureHeight = 512;
+
+        // Create a gradient array
+        std::vector<float> gradient(textureWidth * textureHeight * 3); // RGB as floats
+        for (int y = 0; y < textureHeight; ++y) {
+            for (int x = 0; x < textureWidth; ++x) {
+                int index = (y * textureWidth + x) * 3;
+                gradient[index + 0] = x / float(textureWidth); // Red gradient
+                gradient[index + 1] = y / float(textureHeight); // Green gradient
+                gradient[index + 2] = 0.5f; // Constant Blue
+            }
+        }
+
+        // Generate and bind a texture
+        glGenTextures(1, &testTextureHandle);
+        glBindTexture(GL_TEXTURE_2D, testTextureHandle);
+
+        // Set texture parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        // Upload the texture data
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_FLOAT, gradient.data());
+
+        // Unbind the texture
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+    
+
+    // Render the textured quad
+    overlayShader.useMe();
+
+    // Bind the texture for rendering
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, testTextureHandle);
+    overlayShader.SetUnifInt("u_Texture", 0);
+
+    // Temporarily disable depth testing to ensure the full-screen quad is rendered 
+    // without being affected by depth buffer comparisons.
+    glDisable(GL_DEPTH_TEST);
+    overlayShader.Draw(quad);
+    glEnable(GL_DEPTH_TEST);
 
 }
+
+

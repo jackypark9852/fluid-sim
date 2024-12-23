@@ -4,7 +4,7 @@ Quad::Quad() :
 	Drawable() 
 {}
 
-void Quad::createVBOdata()
+void Quad::CreateVBOdata()
 {
     GLuint idx[6]{ 0,1,2,0,2,3 };
 
@@ -20,15 +20,15 @@ void Quad::createVBOdata()
 
     this->indexCounts[INDEX] = 6;
 
-    this->generateBuffer(INDEX);
-    this->bindBuffer(INDEX);
+    this->GenerateBuffer(INDEX);
+    this->BindBuffer(INDEX);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * 6, idx, GL_STATIC_DRAW);
 
-    this->generateBuffer(POSITION);
-    this->bindBuffer(POSITION);
+    this->GenerateBuffer(POSITION);
+    this->BindBuffer(POSITION);
     glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec4) * 4, vert_pos, GL_STATIC_DRAW);
 
-    this->generateBuffer(UV);
-    this->bindBuffer(UV);
+    this->GenerateBuffer(UV);
+    this->BindBuffer(UV);
     glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 4, vert_UV, GL_STATIC_DRAW);
 }

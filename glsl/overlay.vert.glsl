@@ -1,7 +1,5 @@
-#version 150
-// ^ Change this to version 130 if you have compatibility issues
+#version 330
 
-// Refer to the lambert shader files for useful comments
 in vec4 vs_Pos; // Vertex position
 in vec2 vs_UV; // Vertex texture coordinate
 

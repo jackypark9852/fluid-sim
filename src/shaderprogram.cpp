@@ -138,6 +138,46 @@ void ShaderProgram::SetUnifArrayInt(std::string name, int offset, int i) {
     glUniform1iv(location + offset, 1, &i);  // Adjust location by offset
 }
 
+void ShaderProgram::Draw(const Drawable& drawable)
+{
+    if (drawable.ElemCount(INDEX) < 0) {
+        throw std::invalid_argument(
+            "Attempting to draw a Drawable that has not initialized its count variable! Remember to set it to the length of your index array in create()."
+        );
+    }
+    useMe();
+
+    GLint handle = glGetAttribLocation(prog, "vs_Pos");
+    if (handle != -1 && drawable.BindBuffer(POSITION)) {
+        glEnableVertexAttribArray(handle);
+        glVertexAttribPointer(handle, 4, GL_FLOAT, false, 0, nullptr);
+    }
+
+    handle = glGetAttribLocation(prog, "vs_Nor");
+    if (handle != -1 && drawable.BindBuffer(NORMAL)) {
+        glEnableVertexAttribArray(handle);
+        glVertexAttribPointer(handle, 4, GL_FLOAT, false, 0, nullptr);
+    }
+
+    handle = glGetAttribLocation(prog, "vs_Col");
+    if (handle != -1 && drawable.BindBuffer(COLOR)) {
+        glEnableVertexAttribArray(handle);
+        glVertexAttribPointer(handle, 4, GL_FLOAT, false, 0, nullptr);
+    }
+
+    handle = glGetAttribLocation(prog, "vs_UV");
+    if (handle != -1 && drawable.BindBuffer(UV)) {
+        glEnableVertexAttribArray(handle);
+        glVertexAttribPointer(handle, 2, GL_FLOAT, false, 0, nullptr);
+    }
+
+
+    // Bind the index buffer and then draw shapes from it.
+    // This invokes the shader program, which accesses the vertex buffers.
+    drawable.BindBuffer(INDEX);
+    glDrawElements(drawable.DrawMode(), drawable.ElemCount(INDEX), GL_UNSIGNED_INT, 0);
+}
+
 // Utility function that reads the content of a text file
 std::string ShaderProgram::textFileRead(const char* filepath) {
     std::ifstream file(filepath);
