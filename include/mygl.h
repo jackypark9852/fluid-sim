@@ -6,6 +6,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "shaderprogram.h"
+#include "quad.h"
 
 class MyGL
 {
@@ -18,6 +19,8 @@ private:
 	GLuint vao; 
 
 	ShaderProgram overlayShader; 
+
+	Quad quad; /// <summary> A quad that covers the full screen (e.g. background) </summary>
 
 public: 
 	// Rule of Three
@@ -66,5 +69,10 @@ public:
 	/// and sets up any required shader variables or attributes.
 	/// </summary>
 	bool InitializeShaders();
+
+	/// <summary>
+	/// Uses the overlay shader program to render a test image to the full screen quad 
+	/// </summary>
+	void RenderTestImage(); 
 };
 

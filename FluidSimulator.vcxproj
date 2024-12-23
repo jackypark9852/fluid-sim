@@ -22,6 +22,7 @@
     <ClCompile Include="src\drawable.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\mygl.cpp" />
+    <ClCompile Include="src\quad.cpp" />
     <ClCompile Include="src\shaderprogram.cpp" />
     <ClCompile Include="thirdParty\glad.c" />
     <ClCompile Include="thirdParty\imgui-master\imgui.cpp" />
@@ -37,6 +38,7 @@
     <ClInclude Include="include\drawable.h" />
     <ClInclude Include="include\glm_includes.h" />
     <ClInclude Include="include\mygl.h" />
+    <ClInclude Include="include\quad.h" />
     <ClInclude Include="include\shaderprogram.h" />
   </ItemGroup>
   <ItemGroup>

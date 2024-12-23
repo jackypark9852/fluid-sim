@@ -7,13 +7,13 @@
 MyGL::MyGL(unsigned int windowWidth, unsigned int windowHeight): 
 	windowWidth(windowWidth), windowHeight(windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0), 
-    overlayShader()
+    overlayShader(), quad()
 {}
 
 MyGL::MyGL(const MyGL& other):
 	windowWidth(other.windowWidth), windowHeight(other.windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0),
-    overlayShader()
+    overlayShader(), quad() 
 {}
 
 MyGL::~MyGL() {
@@ -106,10 +106,6 @@ void MyGL::PaintGL() {
     // Example: Show ImGui demo window
     ImGui::ShowDemoWindow();
 
-    overlayShader.useMe(); 
-    int test = 3; 
-    overlayShader.SetUnifInt("u_BlockType", test);
-
     // Clear the screen
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -157,4 +153,9 @@ bool MyGL::WindowShouldClose() {
 
 bool MyGL::InitializeShaders() {
     return overlayShader.Create("glsl/overlay.vert.glsl", "glsl/overlay.frag.glsl");
+}
+
+void MyGL::RenderTestImage()
+{
+
 }

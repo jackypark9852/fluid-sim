@@ -60,6 +60,9 @@
     <ClCompile Include="thirdParty\glad.c">
       <Filter>Source Files\glad</Filter>
     </ClCompile>
+    <ClCompile Include="src\quad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\glm_includes.h">
@@ -72,6 +75,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\shaderprogram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\quad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
