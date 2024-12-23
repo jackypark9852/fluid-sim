@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\drawable.cpp" />
+    <ClCompile Include="src\fluidsimulator.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\mygl.cpp" />
     <ClCompile Include="src\quad.cpp" />
@@ -36,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\drawable.h" />
+    <ClInclude Include="include\fluidsimulator.h" />
     <ClInclude Include="include\glm_includes.h" />
     <ClInclude Include="include\mygl.h" />
     <ClInclude Include="include\quad.h" />
