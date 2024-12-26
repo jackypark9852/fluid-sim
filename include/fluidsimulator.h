@@ -1,13 +1,13 @@
 #pragma once
 
-#pragma once
-
 // Macro for accessing a 1D array with 2D-like syntax. This maps 2D indices (i, j) 
 // to a 1D index in a flattened array. The grid includes a boundary, 
 // so its actual dimensions are (N+2) x (N+2).
 #define IX(i, j) ((i) + (N + 2) * (j))
 
 #include <vector>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 enum class BoundaryType {
     NONE = 0,    // For scalar fields like density (no special reflection)
@@ -22,6 +22,9 @@ private:
 
     unsigned int elemCount;  // Total number of elements in the grid, including boundaries.
                              // This equals (N+2) * (N+2).
+
+    // Texture representing normalized density field as a greyscale image
+    GLuint densityTextureHandle; 
 
     // Horizontal velocity components of the fluid at the current time step
     std::vector<float> u;
@@ -40,38 +43,6 @@ private:
 
     // Density values of the fluid at the previous time step
     std::vector<float> dens_prev;
-
-public: 
-    /// <summary>
-    /// Constructs a FluidSimulator object with a grid size of (N+2) x (N+2), 
-    /// including boundary cells.
-    /// </summary>
-    /// <param name="N">The width (and height) of the inner grid, excluding boundary cells. Defaults to 100.</param>
-    FluidSimulator(unsigned int N = 100);
-
-
-    /// <summary>
-    /// Gets the current horizontal velocity components of the fluid.
-    /// </summary>
-    /// <returns>A constant reference to the vector representing the horizontal velocities (u).</returns>
-    const std::vector<float>& GetU() const;
-
-    /// <summary>
-    /// Gets the current vertical velocity components of the fluid.
-    /// </summary>
-    /// <returns>A constant reference to the vector representing the vertical velocities (v).</returns>
-    const std::vector<float>& GetV() const;
-
-    /// <summary>
-    /// Gets the current density values of the fluid.
-    /// </summary>
-    /// <returns>A constant reference to the vector representing the fluid densities.</returns>
-    const std::vector<float>& GetDens() const;
-
-    /// <summary>
-    /// Advances the simulation by one time step, performing all necessary updates to the fluid's state.
-    /// </summary>
-    void Tick();
 
     /// <summary>
     /// Adds a source term to the given grid by incrementing its values.
@@ -116,7 +87,7 @@ public:
     /// <param name="v">The vertical velocity field.</param>
     /// <param name="diff">The diffusion coefficient controlling the rate of diffusion.</param>
     /// <param name="dt">The time step for the simulation step.</param>
-    void DensStep(int N, std::vector<float>& x, const std::vector<float>& x0, const std::vector<float>& u, 
+    void DensStep(int N, std::vector<float>& x, const std::vector<float>& x0, const std::vector<float>& u,
         const std::vector<float>& v, float diff, float dt);
 
     /// <summary>
@@ -126,5 +97,48 @@ public:
     /// <param name="b"> The type of boundary condition to apply </param>
     /// <param name="x">The grid containing the scalar field to which boundary conditions are applied.</param>
     void SetBoundaryConditions(int N, int b, std::vector<float>& x);
+
+    /// <summary>
+    /// Updates the OpenGL texture with the current density field values.
+    /// </summary>
+    void UpdateDensityTexture();
+
+public: 
+    /// <summary>
+    /// Constructs a FluidSimulator object with a grid size of (N+2) x (N+2), 
+    /// including boundary cells.
+    /// </summary>
+    /// <param name="N">The width (and height) of the inner grid, excluding boundary cells. Defaults to 100.</param>
+    FluidSimulator(unsigned int N = 100);
+
+
+    /// <summary>
+    /// Gets the current horizontal velocity components of the fluid.
+    /// </summary>
+    /// <returns>A constant reference to the vector representing the horizontal velocities (u).</returns>
+    const std::vector<float>& GetU() const;
+
+    /// <summary>
+    /// Gets the current vertical velocity components of the fluid.
+    /// </summary>
+    /// <returns>A constant reference to the vector representing the vertical velocities (v).</returns>
+    const std::vector<float>& GetV() const;
+
+    /// <summary>
+    /// Gets the current density values of the fluid.
+    /// </summary>
+    /// <returns>A constant reference to the vector representing the fluid densities.</returns>
+    const std::vector<float>& GetDens() const;
+
+    /// <summary>
+    /// Advances the simulation by one time step, performing all necessary updates to the fluid's state.
+    /// </summary>
+    void Tick();
+
+    /// <summary>
+    /// Retrieves the OpenGL texture handle for the density field.
+    /// </summary>
+    /// <returns>The OpenGL texture handle associated with the density field.</returns>
+    GLuint GetDensityTextureHandle() const;
 };
             
