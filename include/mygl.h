@@ -19,13 +19,13 @@ private:
 	ImGuiContext* imguiContext;
 	GLuint vao;
 
-	Camera camera;
-	// A variable used to track the mouse's previous position when
-	// clicking and dragging on the GL viewport. Used to move the camera
-	// in the scene.
-	glm::vec2 m_mousePosPrev;
+	ShaderProgram overlayShader;
 
-	ShaderProgram overlayShader; 
+	Camera camera;
+	/// <summary>
+	/// Manages camera rotation, panning, and zoom.
+	/// </summary>
+	void updateCamera();
 
 	Quad quad; /// <summary> A quad that covers the full screen (e.g. background) </summary>
 	GLuint testTextureHandle; /// <summary> The handle for the test texture created in RenderTestTexture() </summary>
