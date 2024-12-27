@@ -1,8 +1,20 @@
 #include "fluidsimulator.h"
 #include <imgui.h>
 
-FluidSimulator::FluidSimulator(unsigned int N)
+FluidSimulator::FluidSimulator(unsigned int N) :
+	N(N), diffusion(1), viscosity(.25)
 {
+	int gridSize = (N + 2) * (N + 2);
+	u.resize(gridSize);
+	v.resize(gridSize);
+	u_prev.resize(gridSize);
+	v_prev.resize(gridSize);
+	dens.resize(gridSize);
+	dens_prev.resize(gridSize);
+
+	for (int i = 0; i < dens.size(); ++i) {
+		dens_prev[i] = rand()%2;
+	}
 }
 
 const std::vector<float>& FluidSimulator::GetU() const
@@ -37,11 +49,14 @@ void FluidSimulator::AddSource(int N, std::vector<float>& x, const std::vector<f
 void FluidSimulator::Diffuse(int N, BoundaryType b, std::vector<float>& x, const std::vector<float>& x0, float diff, float dt)
 {
 	int i, j, k;
-	float a = dt * diff * N * N;
+	double a = dt * diff * N * N;
 	//todo: the 20 here is essentially our time step. It should be a function of grid meter size, not a constant.
 	for (k = 0; k < 20; k++) {
 		for (i = 1; i <= N; i++) {
 			for (j = 1; j <= N; j++) {
+				double initial = x[IX(i, j)];
+				double check = (x0[IX(i, j)] + a * (x[IX(i - 1, j)] + x[IX(i + 1, j)] +
+					x[IX(i, j - 1)] + x[IX(i, j + 1)])) / (1 + 4 * a);
 				x[IX(i, j)] = (x0[IX(i, j)] + a * (x[IX(i - 1, j)] + x[IX(i + 1, j)] +
 					x[IX(i, j - 1)] + x[IX(i, j + 1)])) / (1 + 4 * a);
 			}

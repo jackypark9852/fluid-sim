@@ -16,7 +16,7 @@ enum class BoundaryType {
     VERTICAL     // For vertical velocity (v)
 };
 
-void SWAP(std::vector<float>& x0, std::vector<float>& x) {
+static void SWAP(std::vector<float>& x0, std::vector<float>& x) {
     std::vector<float>& swap = x0;
     x0 = x;
     x = swap;

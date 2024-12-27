@@ -6,8 +6,8 @@
 
 MyGL::MyGL(unsigned int windowWidth, unsigned int windowHeight): 
 	windowWidth(windowWidth), windowHeight(windowHeight), 
-    window(nullptr), imguiContext(nullptr), vao(0), 
-    overlayShader(), quad(), testTextureHandle(-1),
+    window(nullptr), imguiContext(nullptr), vao(0),
+    overlayShader(), fluidSimulator(), quad(), testTextureHandle(-1),
     camera(windowWidth, windowHeight)
 {}
 
@@ -100,6 +100,9 @@ bool MyGL::InitializeGL() {
 }
 
 void MyGL::PaintGL() {
+    // Update fluid sim
+    fluidSimulator.Tick();
+
     // Poll for and process events
     glfwPollEvents();
 

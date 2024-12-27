@@ -8,6 +8,7 @@
 #include "shaderprogram.h"
 #include "quad.h"
 #include "camera.h"
+#include <fluidsimulator.h>
 
 class MyGL
 {
@@ -29,7 +30,7 @@ private:
 
 	Quad quad; /// <summary> A quad that covers the full screen (e.g. background) </summary>
 	GLuint testTextureHandle; /// <summary> The handle for the test texture created in RenderTestTexture() </summary>
-
+	FluidSimulator fluidSimulator;
 public: 
 	// Rule of Three
 	MyGL(unsigned int windowWidth = 1920, unsigned int windowHeight = 1080);
