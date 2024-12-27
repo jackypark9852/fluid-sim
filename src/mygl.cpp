@@ -7,13 +7,15 @@
 MyGL::MyGL(unsigned int windowWidth, unsigned int windowHeight): 
 	windowWidth(windowWidth), windowHeight(windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0), 
-    overlayShader(), quad(), testTextureHandle(-1)
+    overlayShader(), quad(), testTextureHandle(-1),
+    camera(windowWidth, windowHeight), m_mousePosPrev()
 {}
 
 MyGL::MyGL(const MyGL& other):
 	windowWidth(other.windowWidth), windowHeight(other.windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0),
-    overlayShader(), quad(), testTextureHandle(-1)
+    overlayShader(), quad(), testTextureHandle(-1),
+    camera(windowWidth, windowHeight), m_mousePosPrev()
 {}
 
 MyGL::~MyGL() {
@@ -128,6 +130,7 @@ void MyGL::ResizeGL(unsigned int windowWidth, unsigned int windowHeight) {
     this->windowHeight = windowHeight; 
 
     // TODO: Adjust persp matrix
+    camera.recomputeAspectRatio(windowWidth, windowHeight);
 }
 
 void MyGL::ResetGL() {

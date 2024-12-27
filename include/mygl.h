@@ -7,6 +7,7 @@
 #include "imgui_impl_opengl3.h"
 #include "shaderprogram.h"
 #include "quad.h"
+#include "camera.h"
 
 class MyGL
 {
@@ -16,7 +17,13 @@ private:
 
 	GLFWwindow* window; 
 	ImGuiContext* imguiContext;
-	GLuint vao; 
+	GLuint vao;
+
+	Camera camera;
+	// A variable used to track the mouse's previous position when
+	// clicking and dragging on the GL viewport. Used to move the camera
+	// in the scene.
+	glm::vec2 m_mousePosPrev;
 
 	ShaderProgram overlayShader; 
 
