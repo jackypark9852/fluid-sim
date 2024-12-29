@@ -7,8 +7,10 @@
 MyGL::MyGL(unsigned int windowWidth, unsigned int windowHeight): 
 	windowWidth(windowWidth), windowHeight(windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0), 
-    overlayShader(), fluidSimulator(), quad(), testTextureHandle(-1)
-{}
+    overlayShader(), quad(), testTextureHandle(-1)
+{
+    fluidSimulator = FluidSimulator(100, testTextureHandle);
+}
 
 MyGL::MyGL(const MyGL& other):
 	windowWidth(other.windowWidth), windowHeight(other.windowHeight), 
@@ -171,15 +173,17 @@ void MyGL::RenderTestImage()
         const int textureHeight = 512;
 
         // Create a gradient array
-        std::vector<float> gradient(textureWidth * textureHeight * 3); // RGB as floats
+        std::vector<float> gradient(textureWidth * textureHeight * 4); // RGBA as floats
         for (int y = 0; y < textureHeight; ++y) {
             for (int x = 0; x < textureWidth; ++x) {
-                int index = (y * textureWidth + x) * 3;
-                gradient[index + 0] = x / float(textureWidth); // Red gradient
-                gradient[index + 1] = y / float(textureHeight); // Green gradient
-                gradient[index + 2] = 0.5f; // Constant Blue
+                int index = (y * textureWidth + x) * 4;
+                gradient[index + 0] = x / double(textureWidth); // Red gradient
+                gradient[index + 1] = y / double(textureHeight); // Green gradient
+                gradient[index + 2] = 0.1f; // Constant Blue
+                gradient[index + 3] = 1;
             }
         }
+
 
         // Generate and bind a texture
         glGenTextures(1, &testTextureHandle);
@@ -192,12 +196,14 @@ void MyGL::RenderTestImage()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         // Upload the texture data
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, textureWidth, textureHeight, 0, GL_RGB, GL_FLOAT, gradient.data());
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_FLOAT, gradient.data());
 
         // Unbind the texture
         glBindTexture(GL_TEXTURE_2D, 0);
+
+        //Set fluid sim handle
+        fluidSimulator.SetDensityTextureHandle(testTextureHandle);
     }
-    
 
     // Render the textured quad
     overlayShader.useMe();
@@ -212,7 +218,6 @@ void MyGL::RenderTestImage()
     glDisable(GL_DEPTH_TEST);
     overlayShader.Draw(quad);
     glEnable(GL_DEPTH_TEST);
-
 }
 
 
