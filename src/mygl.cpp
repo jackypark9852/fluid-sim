@@ -7,15 +7,15 @@
 MyGL::MyGL(unsigned int windowWidth, unsigned int windowHeight): 
 	windowWidth(windowWidth), windowHeight(windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0), 
-    overlayShader(), quad(), testTextureHandle(-1)
-{
-    fluidSimulator = FluidSimulator(100, testTextureHandle);
-}
+    overlayShader(), quad(), testTextureHandle(-1), 
+    fluidSimulator(windowWidth, windowHeight, 100, testTextureHandle)
+{}
 
 MyGL::MyGL(const MyGL& other):
 	windowWidth(other.windowWidth), windowHeight(other.windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0),
-    overlayShader(), quad(), testTextureHandle(-1)
+    overlayShader(), quad(), testTextureHandle(-1),
+    fluidSimulator(windowWidth, windowHeight, 100, testTextureHandle)
 {}
 
 MyGL::~MyGL() {

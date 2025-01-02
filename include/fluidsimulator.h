@@ -52,6 +52,11 @@ private:
     double viscosity;
 
     double diffusion;
+
+    unsigned int windowWidth; 
+
+    unsigned int windowHeight; 
+
     /// <summary>
     /// Adds a source term to the given grid by incrementing its values.
     /// </summary>
@@ -141,7 +146,7 @@ public:
     /// including boundary cells.
     /// </summary>
     /// <param name="N">The width (and height) of the inner grid, excluding boundary cells. Defaults to 100.</param>
-    FluidSimulator(unsigned int N = 100, GLuint densityTextureHandle = -1);
+    FluidSimulator(unsigned int windowWidth, unsigned int windowHeight, unsigned int N = 100, GLuint densityTextureHandle = -1);
 
 
     /// <summary>
@@ -172,6 +177,15 @@ public:
     /// </summary>
     /// <returns>The OpenGL texture handle associated with the density field.</returns>
     GLuint GetDensityTextureHandle() const;
+
+    /// <summary>
+    /// Updates the source density field based on the current mouse position.
+    /// </summary>
+    /// <param name="source">
+    /// A reference to the density field grid where the source density will be added.
+    /// The grid is updated to represent the density contribution at the mouse position.
+    /// </param>
+    void UpdateDensitySourceFromMouse(std::vector<float>& source);
 
     /// <summary>
     /// Set density gl handle

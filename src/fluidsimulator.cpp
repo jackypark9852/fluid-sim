@@ -1,8 +1,8 @@
 #include "fluidsimulator.h"
 #include <imgui.h>
 
-FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle) :
-	N(N), diffusion(10), viscosity(1), densityTextureHandle(densityTextureHandle), elemCount(N*N)
+FluidSimulator::FluidSimulator(unsigned int windowWidth, unsigned int windowHeight, unsigned int N, GLuint densityTextureHandle) :
+	windowWidth(windowWidth), windowHeight(windowHeight), N(N), diffusion(10), viscosity(1), densityTextureHandle(densityTextureHandle), elemCount(N* N)
 {
 	int gridSize = (N + 2) * (N + 2);
 	u.resize(gridSize);
@@ -46,11 +46,9 @@ void FluidSimulator::Tick()
 	if (densityTextureHandle > 10) return;
 	double dt = ImGui::GetIO().DeltaTime;
 	//todo: fix hardcoded window size
-	int cursorX = ImGui::GetMousePos().x / 1920 * N;
-	int cursorY = (1 - ImGui::GetMousePos().y / 1080) * N;
 	//dens_prev[IX(cursorX, cursorY)] = 4;
 
-	VelStep(N, u, v, u_prev, v_prev, viscosity, dt);
+	//VelStep(N, u, v, u_prev, v_prev, viscosity, dt);
 	DensStep(N, dens, dens_prev, u, v, diffusion, dt);
 	UpdateDensityTexture();
 
@@ -108,11 +106,12 @@ void FluidSimulator::Advect(int N, BoundaryType b, std::vector<double>& d, const
 
 void FluidSimulator::DensStep(int N, std::vector<double>& x, std::vector<double>& x0, const std::vector<double>& u, const std::vector<double>& v, double diff, double dt)
 {
+	
 	AddSource(N, x, x0, dt);
-	SWAP(x,x0); 
-	Diffuse(N, BoundaryType::NONE, x, x0, diff, dt);
-	SWAP(x,x0); 
-	Advect(N, BoundaryType::NONE, x, x0, u, v, dt);
+	//SWAP(x,x0); 
+	//Diffuse(N, BoundaryType::NONE, x, x0, diff, dt);
+	//SWAP(x,x0); 
+	//Advect(N, BoundaryType::NONE, x, x0, u, v, dt);
 }
 
 void FluidSimulator::VelStep(int N, std::vector<double>& u, std::vector<double>& v, std::vector<double>& u0, std::vector<double>& v0,
@@ -198,6 +197,15 @@ void FluidSimulator::UpdateDensityTexture() {
 	glBindTexture(GL_TEXTURE_2D, densityTextureHandle);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, N, N, 0, GL_RGBA, GL_FLOAT, gradient.data());
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void FluidSimulator::UpdateDensitySourceFromMouse(std::vector<float>& source)
+{
+	int cursorX = ImGui::GetMousePos().x / 1920 * N;
+	int cursorY = (1 - ImGui::GetMousePos().y / 1080) * N;
+
+
+
 }
 
 void FluidSimulator::SetDensityTextureHandle(GLuint handle) {
