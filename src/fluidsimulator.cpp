@@ -1,5 +1,7 @@
 #include "fluidsimulator.h"
 #include <imgui.h>
+#include <algorithm>
+#include <iostream>
 
 FluidSimulator::FluidSimulator(unsigned int windowWidth, unsigned int windowHeight, unsigned int N, GLuint densityTextureHandle) :
 	windowWidth(windowWidth), windowHeight(windowHeight), N(N), diffusion(10), viscosity(1), densityTextureHandle(densityTextureHandle), elemCount(N* N)
@@ -11,6 +13,7 @@ FluidSimulator::FluidSimulator(unsigned int windowWidth, unsigned int windowHeig
 	v_prev.resize(gridSize);
 	dens.resize(gridSize);
 	dens_prev.resize(gridSize);
+	source.resize(gridSize); 
 
 	for (int x = 1; x <= N; ++x) {
 		for (int y = 1; y <= N; ++y) {
@@ -106,8 +109,8 @@ void FluidSimulator::Advect(int N, BoundaryType b, std::vector<double>& d, const
 
 void FluidSimulator::DensStep(int N, std::vector<double>& x, std::vector<double>& x0, const std::vector<double>& u, const std::vector<double>& v, double diff, double dt)
 {
-	
-	AddSource(N, x, x0, dt);
+	UpdateDensitySourceFromMouse(source); 
+	AddSource(N, x, source, dt);
 	//SWAP(x,x0); 
 	//Diffuse(N, BoundaryType::NONE, x, x0, diff, dt);
 	//SWAP(x,x0); 
@@ -181,31 +184,58 @@ void FluidSimulator::SetBoundaryConditions(int N, BoundaryType b, std::vector<do
 }
 
 void FluidSimulator::UpdateDensityTexture() {
-	std::vector<float> gradient(N * N * 4); // RGBA as doubles
+	double densMax = 0.0; 
+	for (int y = 1; y <= N; ++y) {
+		for (int x = 1; x <= N; ++x) {
+			densMax = std::max(densMax, dens[IX(x, y)]); 
+		}
+	}
+
+	std::vector<float> color(N * N * 4); // RGBA as doubles
 	for(int y = 1; y <= N; ++y){
 		for (int x = 1; x <= N; ++x) {
-			double pixelDensity = dens[IX(x, y)] / 5.0;
-			int index = ((y-1) * N + (x-1)) * 4;
-			gradient[index] = pixelDensity;
-			gradient[index + 1] = pixelDensity;
-			gradient[index + 2] = pixelDensity;
-			gradient[index + 3] = 1;
+			double pixelDensity = dens[IX(x, y)] / densMax;
+			int index = ((y - 1) * N + (x - 1)) * 4;
+			color[index] = pixelDensity;
+			color[index + 1] = pixelDensity;
+			color[index + 2] = pixelDensity;
+			color[index + 3] = 1;
 		}
 	}
 
 	//todo:: send to gpu. better ways to do this
 	glBindTexture(GL_TEXTURE_2D, densityTextureHandle);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, N, N, 0, GL_RGBA, GL_FLOAT, gradient.data());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, N, N, 0, GL_RGBA, GL_FLOAT, color.data());
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void FluidSimulator::UpdateDensitySourceFromMouse(std::vector<float>& source)
+void FluidSimulator::UpdateDensitySourceFromMouse(std::vector<double>& source)
 {
-	int cursorX = ImGui::GetMousePos().x / 1920 * N;
-	int cursorY = (1 - ImGui::GetMousePos().y / 1080) * N;
+	// Top left is (0, 0) 
+	float mousePosX = ImGui::GetMousePos().x; 
+	float mousePosY = ImGui::GetMousePos().y; 
 
+	// Convert mouse position to array coordinate 
+	unsigned int cursorX = std::max(std::min((unsigned int)((mousePosX / windowWidth) * N), N), (unsigned int) 0);
+	unsigned int cursorY = std::max(std::min((unsigned int)((1.0 - mousePosY / windowHeight) * N), N), (unsigned int)0);
 
+	auto isValidCoord = [&](int i, int j) {
+		return (i >= 0 && i < N + 1) && (j >= 0 && j < N + 1); 
+	}; 
 
+	// Clear the source vector
+	std::fill(source.begin(), source.end(), 0);
+
+	// Set density in a square around the mouse
+	int radius = 5; 
+	double densityAmount = 5.0; 
+	for (int i = cursorX - radius; i < cursorX + radius; ++i) {
+		for (int j = cursorY - radius; j < cursorY + radius; ++j) {
+			if (isValidCoord(i, j)) {
+				source[IX(i, j)] = densityAmount; 
+			}
+		}
+	}
 }
 
 void FluidSimulator::SetDensityTextureHandle(GLuint handle) {

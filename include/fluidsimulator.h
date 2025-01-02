@@ -49,6 +49,11 @@ private:
     // Density values of the fluid at the previous time step
     std::vector<double> dens_prev;
 
+    // Source values of the fluid to be added to the density field
+    // FluidSimulator::UpdateDensitySourceFromMouse() updates the source field so 
+    // that the density is added at the mouse position
+    std::vector<double> source; 
+
     double viscosity;
 
     double diffusion;
@@ -185,7 +190,7 @@ public:
     /// A reference to the density field grid where the source density will be added.
     /// The grid is updated to represent the density contribution at the mouse position.
     /// </param>
-    void UpdateDensitySourceFromMouse(std::vector<float>& source);
+    void UpdateDensitySourceFromMouse(std::vector<double>& source);
 
     /// <summary>
     /// Set density gl handle
