@@ -62,6 +62,23 @@ private:
     void AddSource(int N, std::vector<double>& x, const std::vector<double>& s, double dT);
 
     /// <summary>
+    /// Adds amt density to the xy grid cell.
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="amt"></param>
+    void AddDens(int x, int y, float amt);
+
+    /// <summary>
+    /// Adds amt vel to the xy grid cell;
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="amtX"></param>
+    /// <param name="amtY"></param>
+    void AddVel(int x, int y, float amtX, float amtY);
+
+    /// <summary>
     /// Diffuses the scalar field over the grid, spreading values according to the diffusion coefficient.
     /// </summary>
     /// <param name="N">The size of the grid (excluding boundaries).</param>

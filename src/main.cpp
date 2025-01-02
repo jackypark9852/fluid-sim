@@ -3,11 +3,12 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "iostream"
 
 int main(void)
 {
     MyGL myGL;
-    myGL.InitializeGL(); 
+    myGL.InitializeGL();
 
     /* Loop until the user closes the window */
     while (!myGL.WindowShouldClose())

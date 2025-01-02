@@ -1,8 +1,10 @@
 #include "fluidsimulator.h"
 #include <imgui.h>
+#include <glm/glm.hpp>
+#include <iostream>
 
 FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle) :
-	N(N), diffusion(10), viscosity(1), densityTextureHandle(densityTextureHandle), elemCount(N*N)
+	N(N), diffusion(0.001), viscosity(0), densityTextureHandle(densityTextureHandle), elemCount(N*N)
 {
 	int gridSize = (N + 2) * (N + 2);
 	u.resize(gridSize);
@@ -14,16 +16,19 @@ FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle) :
 
 	for (int x = 1; x <= N; ++x) {
 		for (int y = 1; y <= N; ++y) {
-			if (y >= N / 2) {
-				dens_prev[IX(x, y)] = 4;
+			if (x >= N - 20) {
+				//dens_prev[IX(x, y)] = 4;
 			}
 			else {
-				dens_prev[IX(x, y)] = 1;
+				//dens_prev[IX(x, y)] = 1;
 
 			}
+
+			// u[IX(x, y)] = 1;
 		}
 	}
 
+	std::cout << "hello" << std::endl;
 }
 
 const std::vector<double>& FluidSimulator::GetU() const
@@ -44,7 +49,7 @@ const std::vector<double>& FluidSimulator::GetDens() const
 void FluidSimulator::Tick()
 {
 	if (densityTextureHandle > 10) return;
-	double dt = ImGui::GetIO().DeltaTime;
+	double dt = 0.016;// ImGui::GetIO().DeltaTime;
 	//todo: fix hardcoded window size
 	int cursorX = ImGui::GetMousePos().x / 1920 * N;
 	int cursorY = (1 - ImGui::GetMousePos().y / 1080) * N;
@@ -54,12 +59,37 @@ void FluidSimulator::Tick()
 	DensStep(N, dens, dens_prev, u, v, diffusion, dt);
 	UpdateDensityTexture();
 
-	/*double densSum = 0;
+	if (ImGui::IsMouseDragging(0)) {
+		ImVec2 dragVec = ImGui::GetMouseDragDelta(0);
+		// AddVel(cursorX, cursorY, dragVec.x, dragVec.y);
+		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N) {
+			AddDens(cursorX, cursorY, abs((dragVec.x + dragVec.y) * 100));
+		}
+	}
+	else if (ImGui::IsMouseDragging(1)) {
+		ImVec2 dragVec = ImGui::GetMouseDragDelta(1);
+		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N) {
+			AddVel(cursorX, cursorY, dragVec.x * 0.001, dragVec.y * 0.001);
+		}
+	}
+
+	for (int x = 1; x <= N; ++x) {
+		for (int y = 1; y <= N; y++) {
+			//dens[IX(x, y)] *= 0.99;
+		}
+	}
+
+	double densSum = 0;
 	for (int i = 0; i < dens.size(); ++i) {
 		densSum += dens[i];
 	}
 	densSum += 1;
-	*/
+	std::cout << densSum << std::endl;
+	
+
+	/*for (int i = 0; i <= N; ++i) {
+		AddDens(10, i, 100);
+	}*/
 }
 
 void FluidSimulator::AddSource(int N, std::vector<double>& x, const std::vector<double>& s, double dT)
@@ -68,12 +98,21 @@ void FluidSimulator::AddSource(int N, std::vector<double>& x, const std::vector<
 	for (cell = 0; cell < size; cell++) x[cell] += dT * s[cell];
 }
 
+void FluidSimulator::AddDens(int x, int y, float amt) {
+	dens[IX(x, y)] += glm::clamp(amt + (float) dens[IX(x, y)], 0.f, 1.f);
+}
+
+void FluidSimulator::AddVel(int x, int y, float amtX, float amtY) {
+	u[IX(x, y)] += amtX;
+	v[IX(x, y)] += amtY;
+}
+
 void FluidSimulator::Diffuse(int N, BoundaryType b, std::vector<double>& x, const std::vector<double>& x0, double diff, double dt)
 {
 	int i, j, k;
 	double a = dt * diff * N * N;
 	//todo: the 20 here is essentially our time step. It should be a function of grid meter size, not a constant.
-	for (k = 0; k < 1; k++) {
+	for (k = 0; k < 20; k++) {
 		for (i = 1; i <= N; i++) {
 			for (j = 1; j <= N; j++) {
 				double initial = x[IX(i, j)];
@@ -108,7 +147,7 @@ void FluidSimulator::Advect(int N, BoundaryType b, std::vector<double>& d, const
 
 void FluidSimulator::DensStep(int N, std::vector<double>& x, std::vector<double>& x0, const std::vector<double>& u, const std::vector<double>& v, double diff, double dt)
 {
-	AddSource(N, x, x0, dt);
+	// AddSource(N, x, x0, dt);
 	SWAP(x,x0); 
 	Diffuse(N, BoundaryType::NONE, x, x0, diff, dt);
 	SWAP(x,x0); 
@@ -190,6 +229,9 @@ void FluidSimulator::UpdateDensityTexture() {
 			gradient[index] = pixelDensity;
 			gradient[index + 1] = pixelDensity;
 			gradient[index + 2] = pixelDensity;
+			if (pixelDensity > 1.1) {
+				gradient[index + 2] = 0;
+			}
 			gradient[index + 3] = 1;
 		}
 	}
