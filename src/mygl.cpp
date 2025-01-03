@@ -8,7 +8,8 @@ MyGL::MyGL(unsigned int windowWidth, unsigned int windowHeight):
 	windowWidth(windowWidth), windowHeight(windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0), 
     overlayShader(), quad(), testTextureHandle(-1),
-    fluidSimulator(100, testTextureHandle)
+    fluidSimulator(100, testTextureHandle),
+    camera(windowWidth, windowHeight)
 {
     // fluidSimulator = FluidSimulator(100, testTextureHandle);
 }
@@ -16,7 +17,8 @@ MyGL::MyGL(unsigned int windowWidth, unsigned int windowHeight):
 MyGL::MyGL(const MyGL& other):
 	windowWidth(other.windowWidth), windowHeight(other.windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0),
-    overlayShader(), quad(), testTextureHandle(-1)
+    overlayShader(), quad(), testTextureHandle(-1),
+    camera(windowWidth, windowHeight)
 {}
 
 MyGL::~MyGL() {
@@ -113,7 +115,11 @@ void MyGL::PaintGL() {
     ImGui::NewFrame();
 
     // Example: Show ImGui demo window
-    ImGui::ShowDemoWindow();    
+    ImGui::ShowDemoWindow();
+
+    // Handle mouse events for camera functions
+    // TODO: move this somewhere more appropriate, but we don't have a Tick() yet().
+    updateCamera();
 
     // Clear the screen
     glClearColor(0.9f, 0.9f, 0.9f, 1.0f); 
@@ -134,6 +140,7 @@ void MyGL::ResizeGL(unsigned int windowWidth, unsigned int windowHeight) {
     this->windowHeight = windowHeight; 
 
     // TODO: Adjust persp matrix
+    camera.recomputeAspectRatio(windowWidth, windowHeight);
 }
 
 void MyGL::ResetGL() {
@@ -221,4 +228,23 @@ void MyGL::RenderTestImage()
     glEnable(GL_DEPTH_TEST);
 }
 
-
+void MyGL::updateCamera() {
+    // Can add scalars to these values to adjust transform speeds
+    if (!imguiContext) {
+        return;
+    }
+    ImGuiIO& io = ImGui::GetIO();
+    if (ImGui::IsMousePosValid() && ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
+        if (ImGui::IsMouseDown(0)) {
+            camera.RotateAboutGlobalUp(ImGui::GetMouseDragDelta().x);
+            camera.RotateAboutLocalRight(-ImGui::GetMouseDragDelta().y);
+        }
+        else if (ImGui::IsMouseDown(1)) {
+            camera.PanAlongRight(-ImGui::GetMouseDragDelta().x);
+            camera.PanAlongUp(ImGui::GetMouseDragDelta().y);
+        }
+        if (io.MouseWheel) {
+            camera.Zoom(io.MouseWheel * 0.2f);
+        }
+    }
+}

@@ -7,6 +7,7 @@
 #include "imgui_impl_opengl3.h"
 #include "shaderprogram.h"
 #include "quad.h"
+#include "camera.h"
 #include <fluidsimulator.h>
 
 class MyGL
@@ -17,9 +18,15 @@ private:
 
 	GLFWwindow* window; 
 	ImGuiContext* imguiContext;
-	GLuint vao; 
+	GLuint vao;
 
-	ShaderProgram overlayShader; 
+	ShaderProgram overlayShader;
+
+	Camera camera;
+	/// <summary>
+	/// Manages camera rotation, panning, and zoom.
+	/// </summary>
+	void updateCamera();
 
 	Quad quad; /// <summary> A quad that covers the full screen (e.g. background) </summary>
 	GLuint testTextureHandle; /// <summary> The handle for the test texture created in RenderTestTexture() </summary>
