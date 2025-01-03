@@ -74,14 +74,14 @@ void FluidSimulator::Tick()
 	DensStep(N, dens, dens_prev, u, v, diffusion, dt);
 	UpdateDensityTexture();
 
-	if (ImGui::IsMouseDragging(0)) {
+	if (ImGui::IsMouseDragging(0) && !ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
 		ImVec2 dragVec = ImGui::GetMouseDragDelta(0);
 		// AddVel(cursorX, cursorY, dragVec.x, dragVec.y);
 		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N) {
 			AddDens(cursorX, cursorY, abs((dragVec.x + dragVec.y) * 100));
 		}
 	}
-	else if (ImGui::IsMouseDragging(1)) {
+	else if (ImGui::IsMouseDragging(1) && !ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
 		ImVec2 dragVec = ImGui::GetMouseDragDelta(1);
 		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N) {
 			AddVel(cursorX, cursorY, dragVec.x * 0.001, dragVec.y * 0.001);

@@ -78,6 +78,9 @@
     <ClCompile Include="src\circularSource.cpp">
       <Filter>Source Files\densitySource</Filter>
     </ClCompile>
+    <ClCompile Include="src\camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\glm_includes.h">
@@ -106,6 +109,8 @@
     </ClInclude>
     <ClInclude Include="src\densitySource.h">
       <Filter>Source Files\densitySource</Filter>
+    <ClInclude Include="include\camera.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
