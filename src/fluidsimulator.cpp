@@ -6,8 +6,9 @@
 #include "circularSource.h"
 #include "rectvelocitysource.h"
 
-FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle) :
-	N(N), diffusion(0.0001), viscosity(0), densityTextureHandle(densityTextureHandle), elemCount(N*N), densSources()
+FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle, GLuint velocityTextureHandle) :
+	N(N), diffusion(0.0001), viscosity(0), densityTextureHandle(densityTextureHandle), elemCount(N*N), densSources(),
+	velocityTextureHandle(velocityTextureHandle)
 {
 	int gridSize = (N + 2) * (N + 2);
 	u.resize(gridSize);
@@ -27,7 +28,7 @@ FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle) :
 
 			}
 
-			// u[IX(x, y)] = 1;
+			u[IX(x, y)] = 1;
 		}
 	}
 
@@ -73,6 +74,9 @@ void FluidSimulator::Tick()
 	VelStep(N, u, v, u_prev, v_prev, viscosity, dt);
 	DensStep(N, dens, dens_prev, u, v, diffusion, dt);
 	UpdateDensityTexture();
+	if (velocityTextureHandle <= 10) {
+		UpdateVelocityTexture();
+	}
 
 	if (ImGui::IsMouseDragging(0) && !ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
 		ImVec2 dragVec = ImGui::GetMouseDragDelta(0);
@@ -110,6 +114,11 @@ void FluidSimulator::Tick()
 GLuint FluidSimulator::GetDensityTextureHandle() const
 {
 	return densityTextureHandle;
+}
+
+GLuint FluidSimulator::GetVelocityTextureHandle() const
+{
+	return velocityTextureHandle;
 }
 
 void FluidSimulator::AddSource(int N, std::vector<double>& x, const std::vector<double>& s, double dT)
@@ -283,4 +292,28 @@ void FluidSimulator::UpdateDensityTexture() {
 
 void FluidSimulator::SetDensityTextureHandle(GLuint handle) {
 	densityTextureHandle = handle;
+}
+
+void FluidSimulator::UpdateVelocityTexture() {
+	std::vector<float> field(N * N * 4); // RGBA as doubles
+
+	for (int y = 1; y <= N; ++y) {
+		for (int x = 1; x <= N; ++x) {
+			glm::vec3 pixelVelocity = glm::vec3(u[IX(x, y)], v[IX(x, y)], 0.f);
+			int index = ((y - 1) * N + (x - 1)) * 4;
+			field[index] = pixelVelocity.x;
+			field[index + 1] = pixelVelocity.y;
+			field[index + 2] = pixelVelocity.z;
+			field[index + 3] = 1;
+		}
+	}
+
+	//todo:: send to gpu. better ways to do this
+	glBindTexture(GL_TEXTURE_2D, velocityTextureHandle);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, N, N, 0, GL_RGBA, GL_FLOAT, field.data());
+	glBindTexture(GL_TEXTURE_2D, 1);
+}
+
+void FluidSimulator::SetVelocityTextureHandle(GLuint handle) {
+	velocityTextureHandle = handle;
 }

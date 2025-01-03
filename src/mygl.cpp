@@ -7,8 +7,8 @@
 MyGL::MyGL(unsigned int windowWidth, unsigned int windowHeight): 
 	windowWidth(windowWidth), windowHeight(windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0), 
-    overlayShader(), quad(), testTextureHandle(-1),
-    fluidSimulator(100, testTextureHandle),
+    overlayShader(), quad(), testTextureHandle(-1), velocityTextureHandle(-1),
+    fluidSimulator(100, testTextureHandle, velocityTextureHandle),
     camera(windowWidth, windowHeight),
     velFieldShader(), arrow()
 {
@@ -19,7 +19,7 @@ MyGL::MyGL(const MyGL& other):
 	windowWidth(other.windowWidth), windowHeight(other.windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0),
     overlayShader(), quad(), testTextureHandle(-1),
-    camera(windowWidth, windowHeight),
+    camera(windowWidth, windowHeight), velocityTextureHandle(-1),
     velFieldShader(), arrow()
 {}
 
@@ -238,9 +238,35 @@ void MyGL::RenderTestImage()
 }
 
 void MyGL::RenderVelocityField() {
+    // create and bind texture
+    if (velocityTextureHandle == -1) {
+        const int textureWidth = 512;
+        const int textureHeight = 512;
+
+        // Generate and bind a texture
+        glGenTextures(1, &velocityTextureHandle);
+        glBindTexture(GL_TEXTURE_2D, velocityTextureHandle);
+
+        // Set texture parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        // Unbind the texture
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        //Set fluid sim handle
+        fluidSimulator.SetVelocityTextureHandle(velocityTextureHandle);
+    }
+
     // render velocity field
     velFieldShader.useMe();
-    velFieldShader.SetUnifInt("u_Texture", 0);
+
+    // Bind the texture for rendering
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, velocityTextureHandle);
+    velFieldShader.SetUnifInt("u_Texture", 1);
     glDisable(GL_DEPTH_TEST);
     velFieldShader.Draw(arrow);
     glEnable(GL_DEPTH_TEST);

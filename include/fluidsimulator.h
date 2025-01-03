@@ -31,7 +31,10 @@ private:
                              // This equals (N+2) * (N+2).
 
     // Texture representing normalized density field as a greyscale image
-    GLuint densityTextureHandle; 
+    GLuint densityTextureHandle;
+
+    // Texture representing the velocity field as an rgb image corresponding to xyz vals
+    GLuint velocityTextureHandle;
 
     // Horizontal velocity components of the fluid at the current time step
     std::vector<double> u;
@@ -174,13 +177,18 @@ private:
     /// </summary>
     void UpdateDensityTexture();
 
+    /// <summary>
+    /// Updates the OpenGL texture with the current velocity field values.
+    /// </summary>
+    void UpdateVelocityTexture();
+
 public: 
     /// <summary>
     /// Constructs a FluidSimulator object with a grid size of (N+2) x (N+2), 
     /// including boundary cells.
     /// </summary>
     /// <param name="N">The width (and height) of the inner grid, excluding boundary cells. Defaults to 100.</param>
-    FluidSimulator(unsigned int N = 100, GLuint densityTextureHandle = -1);
+    FluidSimulator(unsigned int N = 100, GLuint densityTextureHandle = -1, GLuint velocityTextureHandle = -1);
 
 
     /// <summary>
@@ -217,5 +225,17 @@ public:
     /// </summary>
     /// <param name="handle"></param> handle
     void SetDensityTextureHandle(GLuint handle);
+
+    /// <summary>
+    /// Retrieves the OpenGL texture handle for the velocity field.
+    /// </summary>
+    /// <returns>The OpenGL texture handle associated with the density field.</returns>
+    GLuint GetVelocityTextureHandle() const;
+
+    /// <summary>
+    /// Set velocity gl handle
+    /// </summary>
+    /// <param name="handle"></param> handle
+    void SetVelocityTextureHandle(GLuint handle);
 };
             

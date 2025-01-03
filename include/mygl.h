@@ -13,11 +13,11 @@
 
 class MyGL
 {
-private: 
+private:
 	unsigned int windowWidth;
 	unsigned int windowHeight;
 
-	GLFWwindow* window; 
+	GLFWwindow* window;
 	ImGuiContext* imguiContext;
 	GLuint vao;
 
@@ -33,25 +33,26 @@ private:
 	Quad quad; /// <summary> A quad that covers the full screen (e.g. background) </summary>
 	Arrow arrow; /// <summary> An arrow used for the velocity field display </summary>
 	GLuint testTextureHandle; /// <summary> The handle for the test texture created in RenderTestTexture() </summary>
+	GLuint velocityTextureHandle; /// <summary> The handle for the velocity field texture created in RenderVelocityField() </summary>
 	FluidSimulator fluidSimulator;
-public: 
+public:
 	// Rule of Three
 	MyGL(unsigned int windowWidth = 1200, unsigned int windowHeight = 1200);
-	MyGL(const MyGL& other); 
+	MyGL(const MyGL& other);
 	~MyGL();
-	MyGL& operator=(const MyGL& other); 
-	
+	MyGL& operator=(const MyGL& other);
+
 	/// <summary>
 	/// Creates an OpenGL window and compiles shader programs. 
 	/// </summary>
 	/// <returns> Whether intialization succeded </returns>
-	bool InitializeGL(); 
+	bool InitializeGL();
 
 	/// <summary>
 	/// Clears the active window and renders scene and UI. 
 	/// </summary>
-	void PaintGL(); 
-	
+	void PaintGL();
+
 	/// <summary>
 	/// Called whenever the window is resized. 
 	/// Adjusts parameters dependent on window size such as perspective matrix. 
@@ -63,12 +64,12 @@ public:
 	/// <summary>
 	/// Cleans up and reinitialzes window and context 
 	/// </summary>
-	void ResetGL(); 
+	void ResetGL();
 
 	/// <summary>
 	/// Cleans up resources related to this window and context
 	/// </summary>
-	void CleanUp(); 
+	void CleanUp();
 
 	/// <summary>
 	/// Checks whether the OpenGL window should close, typically triggered by user input or system events.
@@ -85,7 +86,7 @@ public:
 	/// <summary>
 	/// Uses the overlay shader program to render a test image to the full screen quad 
 	/// </summary>
-	void RenderTestImage(); 
+	void RenderTestImage();
 
 	/// <summary>
 	/// Uses the velField shader program to render a velocity field
