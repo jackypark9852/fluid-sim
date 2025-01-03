@@ -19,6 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="include\densitysource.cpp" />
+    <ClCompile Include="include\rectvelocitysource.cpp" />
+    <ClCompile Include="include\velocitysource.cpp" />
+    <ClCompile Include="src\circularsource.cpp" />
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\drawable.cpp" />
     <ClCompile Include="src\fluidsimulator.cpp" />
@@ -37,13 +41,17 @@
     <ClCompile Include="thirdParty\imgui-master\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\circularsource.h" />
+    <ClInclude Include="include\densitysource.h" />
     <ClInclude Include="include\camera.h" />
     <ClInclude Include="include\drawable.h" />
     <ClInclude Include="include\fluidsimulator.h" />
     <ClInclude Include="include\glm_includes.h" />
     <ClInclude Include="include\mygl.h" />
     <ClInclude Include="include\quad.h" />
+    <ClInclude Include="include\rectvelocitysource.h" />
     <ClInclude Include="include\shaderprogram.h" />
+    <ClInclude Include="include\velocitysource.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="glsl\overlay.frag.glsl" />
