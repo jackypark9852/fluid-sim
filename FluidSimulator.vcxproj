@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\densitysource.cpp" />
+    <ClCompile Include="include\rectvelocitysource.cpp" />
     <ClCompile Include="include\velocitysource.cpp" />
     <ClCompile Include="src\circularsource.cpp" />
     <ClCompile Include="src\drawable.cpp" />
@@ -46,6 +47,7 @@
     <ClInclude Include="include\glm_includes.h" />
     <ClInclude Include="include\mygl.h" />
     <ClInclude Include="include\quad.h" />
+    <ClInclude Include="include\rectvelocitysource.h" />
     <ClInclude Include="include\shaderprogram.h" />
     <ClInclude Include="include\velocitysource.h" />
   </ItemGroup>

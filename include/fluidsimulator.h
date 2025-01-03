@@ -10,6 +10,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "densitySource.h"
+#include "velocitysource.h"
 
 enum class BoundaryType {
     NONE = 0,    // For scalar fields like density (no special reflection)
@@ -52,6 +53,9 @@ private:
 
     // Density sources present in the current simulation 
     std::vector<DensitySource> densSources; 
+    
+    // Velocity sources present in the current simulation
+    std::vector<VelocitySource> velSources; 
 
     double viscosity;
 
@@ -72,7 +76,13 @@ private:
     /// <param name="dT">The time step used to scale the contributions from each source.</param>
     void ApplyDensitySources(double dT);
 
-
+    /// <summary>
+    /// Iterates through all active velocity sources in the simulation and updates the velocity grids by adding
+    /// the contributions from each source.
+    /// </summary>
+    /// <param name="dT">The time step used to scale the contributions from each source.</param>
+    void ApplyVelocitySources(double dT); 
+    
     /// <summary>
     /// Adds amt density to the xy grid cell.
     /// </summary>
