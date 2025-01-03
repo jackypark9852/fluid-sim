@@ -16,10 +16,8 @@ enum class BoundaryType {
     VERTICAL     // For vertical velocity (v)
 };
 
-static void SWAP(std::vector<float>& x0, std::vector<float>& x) {
-    std::vector<float>& swap = x0;
-    x0 = x;
-    x = swap;
+static void SWAP(std::vector<double>& x0, std::vector<double>& x) {
+    x0.swap(x);
 }
 
 class FluidSimulator {
@@ -34,26 +32,26 @@ private:
     GLuint densityTextureHandle; 
 
     // Horizontal velocity components of the fluid at the current time step
-    std::vector<float> u;
+    std::vector<double> u;
 
     // Horizontal velocity components of the fluid at the previous time step
-    std::vector<float> u_prev;
+    std::vector<double> u_prev;
 
     // Vertical velocity components of the fluid at the current time step
-    std::vector<float> v;
+    std::vector<double> v;
 
     // Vertical velocity components of the fluid at the previous time step
-    std::vector<float> v_prev;
+    std::vector<double> v_prev;
 
     // Density values of the fluid at the current time step
-    std::vector<float> dens;
+    std::vector<double> dens;
 
     // Density values of the fluid at the previous time step
-    std::vector<float> dens_prev;
+    std::vector<double> dens_prev;
 
-    float viscosity;
+    double viscosity;
 
-    float diffusion;
+    double diffusion;
     /// <summary>
     /// Adds a source term to the given grid by incrementing its values.
     /// </summary>
@@ -61,7 +59,24 @@ private:
     /// <param name="x">The grid to which the source values will be added.</param>
     /// <param name="s">The source grid containing the values to add.</param>
     /// <param name="dT">The time step for scaling the source contribution.</param>
-    void AddSource(int N, std::vector<float>& x, const std::vector<float>& s, float dT);
+    void AddSource(int N, std::vector<double>& x, const std::vector<double>& s, double dT);
+
+    /// <summary>
+    /// Adds amt density to the xy grid cell.
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="amt"></param>
+    void AddDens(int x, int y, float amt);
+
+    /// <summary>
+    /// Adds amt vel to the xy grid cell;
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="amtX"></param>
+    /// <param name="amtY"></param>
+    void AddVel(int x, int y, float amtX, float amtY);
 
     /// <summary>
     /// Diffuses the scalar field over the grid, spreading values according to the diffusion coefficient.
@@ -72,7 +87,7 @@ private:
     /// <param name="x0">The grid containing the initial values before diffusion.</param>
     /// <param name="diff">The diffusion coefficient controlling the rate of diffusion.</param>
     /// <param name="dt">The time step over which diffusion occurs.</param>
-    void Diffuse(int N, BoundaryType b, std::vector<float>& x, const std::vector<float>& x0, float diff, float dt);
+    void Diffuse(int N, BoundaryType b, std::vector<double>& x, const std::vector<double>& x0, double diff, double dt);
 
     /// <summary>
     /// Moves scalar values (e.g., density) through the grid based on the velocity field.
@@ -84,8 +99,8 @@ private:
     /// <param name="u">The horizontal velocity field.</param>
     /// <param name="v">The vertical velocity field.</param>
     /// <param name="dt">The time step over which advection occurs.</param>
-    void Advect(int N, BoundaryType b, std::vector<float>& d, const std::vector<float>& d0, const std::vector<float>& u,
-        const std::vector<float>& v, float dt);
+    void Advect(int N, BoundaryType b, std::vector<double>& d, const std::vector<double>& d0, const std::vector<double>& u,
+        const std::vector<double>& v, double dt);
 
     /// <summary>
     /// Performs a full simulation step for the density field, including diffusion and advection.
@@ -97,8 +112,8 @@ private:
     /// <param name="v">The vertical velocity field.</param>
     /// <param name="diff">The diffusion coefficient controlling the rate of diffusion.</param>
     /// <param name="dt">The time step for the simulation step.</param>
-    void DensStep(int N, std::vector<float>& x, std::vector<float>& x0, const std::vector<float>& u,
-        const std::vector<float>& v, float diff, float dt);
+    void DensStep(int N, std::vector<double>& x, std::vector<double>& x0, const std::vector<double>& u,
+        const std::vector<double>& v, double diff, double dt);
 
     /// <summary>
     /// Performs a full simulation step for velocity field
@@ -110,8 +125,8 @@ private:
     /// <param name="v0">The vertical velocity field from the previous time step.</param>
     /// <param name="visc">The viscosity coefficient controlling the rate of diffusion.</param>
     /// <param name="dt">The time step for the simulation step.</param>
-    void VelStep(int N, std::vector<float>& u, std::vector<float>& v, std::vector<float>& u0, std::vector<float>& v0,
-        float visc, float dt);
+    void VelStep(int N, std::vector<double>& u, std::vector<double>& v, std::vector<double>& u0, std::vector<double>& v0,
+        double visc, double dt);
 
     /// <summary>
     /// 
@@ -122,7 +137,7 @@ private:
     /// <param name="p"></param>
     /// <param name="div"></param>
     /// todo: documentation here 
-    void Project(int N, std::vector<float>& u, std::vector<float>& v, std::vector<float>& p, std::vector<float>& div);
+    void Project(int N, std::vector<double>& u, std::vector<double>& v, std::vector<double>& p, std::vector<double>& div);
 
     /// <summary>
     /// Applies boundary conditions to a scalar field on the simulation grid.
@@ -130,7 +145,7 @@ private:
     /// <param name="N">The size of the inner grid (excluding boundary cells).</param>
     /// <param name="b"> The type of boundary condition to apply </param>
     /// <param name="x">The grid containing the scalar field to which boundary conditions are applied.</param>
-    void SetBoundaryConditions(int N, BoundaryType b, std::vector<float>& x);
+    void SetBoundaryConditions(int N, BoundaryType b, std::vector<double>& x);
 
     /// <summary>
     /// Updates the OpenGL texture with the current density field values.
@@ -143,26 +158,26 @@ public:
     /// including boundary cells.
     /// </summary>
     /// <param name="N">The width (and height) of the inner grid, excluding boundary cells. Defaults to 100.</param>
-    FluidSimulator(unsigned int N = 100);
+    FluidSimulator(unsigned int N = 100, GLuint densityTextureHandle = -1);
 
 
     /// <summary>
     /// Gets the current horizontal velocity components of the fluid.
     /// </summary>
     /// <returns>A constant reference to the vector representing the horizontal velocities (u).</returns>
-    const std::vector<float>& GetU() const;
+    const std::vector<double>& GetU() const;
 
     /// <summary>
     /// Gets the current vertical velocity components of the fluid.
     /// </summary>
     /// <returns>A constant reference to the vector representing the vertical velocities (v).</returns>
-    const std::vector<float>& GetV() const;
+    const std::vector<double>& GetV() const;
 
     /// <summary>
     /// Gets the current density values of the fluid.
     /// </summary>
     /// <returns>A constant reference to the vector representing the fluid densities.</returns>
-    const std::vector<float>& GetDens() const;
+    const std::vector<double>& GetDens() const;
 
     /// <summary>
     /// Advances the simulation by one time step, performing all necessary updates to the fluid's state.
@@ -174,5 +189,11 @@ public:
     /// </summary>
     /// <returns>The OpenGL texture handle associated with the density field.</returns>
     GLuint GetDensityTextureHandle() const;
+
+    /// <summary>
+    /// Set density gl handle
+    /// </summary>
+    /// <param name="handle"></param> handle
+    void SetDensityTextureHandle(GLuint handle);
 };
             

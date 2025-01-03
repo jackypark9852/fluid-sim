@@ -1,8 +1,10 @@
 #include "fluidsimulator.h"
 #include <imgui.h>
+#include <glm/glm.hpp>
+#include <iostream>
 
-FluidSimulator::FluidSimulator(unsigned int N) :
-	N(N), diffusion(1), viscosity(.25)
+FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle) :
+	N(N), diffusion(0.001), viscosity(0), densityTextureHandle(densityTextureHandle), elemCount(N*N)
 {
 	int gridSize = (N + 2) * (N + 2);
 	u.resize(gridSize);
@@ -12,41 +14,100 @@ FluidSimulator::FluidSimulator(unsigned int N) :
 	dens.resize(gridSize);
 	dens_prev.resize(gridSize);
 
-	for (int i = 0; i < dens.size(); ++i) {
-		dens_prev[i] = rand()%2;
+	for (int x = 1; x <= N; ++x) {
+		for (int y = 1; y <= N; ++y) {
+			if (x >= N - 20) {
+				//dens_prev[IX(x, y)] = 4;
+			}
+			else {
+				//dens_prev[IX(x, y)] = 1;
+
+			}
+
+			// u[IX(x, y)] = 1;
+		}
 	}
+
+	std::cout << "hello" << std::endl;
 }
 
-const std::vector<float>& FluidSimulator::GetU() const
+const std::vector<double>& FluidSimulator::GetU() const
 {
 	return u;
 }
 
-const std::vector<float>& FluidSimulator::GetV() const
+const std::vector<double>& FluidSimulator::GetV() const
 {
 	return v;
 }
 
-const std::vector<float>& FluidSimulator::GetDens() const
+const std::vector<double>& FluidSimulator::GetDens() const
 {
 	return dens;
 }
 
 void FluidSimulator::Tick()
 {
-	float dt = ImGui::GetIO().DeltaTime;
+	if (densityTextureHandle > 10) return;
+	double dt = 0.016;// ImGui::GetIO().DeltaTime;
+	//todo: fix hardcoded window size
+	int cursorX = ImGui::GetMousePos().x / 1920 * N;
+	int cursorY = (1 - ImGui::GetMousePos().y / 1080) * N;
+	//dens_prev[IX(cursorX, cursorY)] = 4;
+
 	VelStep(N, u, v, u_prev, v_prev, viscosity, dt);
 	DensStep(N, dens, dens_prev, u, v, diffusion, dt);
 	UpdateDensityTexture();
+
+	if (ImGui::IsMouseDragging(0)) {
+		ImVec2 dragVec = ImGui::GetMouseDragDelta(0);
+		// AddVel(cursorX, cursorY, dragVec.x, dragVec.y);
+		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N) {
+			AddDens(cursorX, cursorY, abs((dragVec.x + dragVec.y) * 100));
+		}
+	}
+	else if (ImGui::IsMouseDragging(1)) {
+		ImVec2 dragVec = ImGui::GetMouseDragDelta(1);
+		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N) {
+			AddVel(cursorX, cursorY, dragVec.x * 0.001, dragVec.y * 0.001);
+		}
+	}
+
+	for (int x = 1; x <= N; ++x) {
+		for (int y = 1; y <= N; y++) {
+			//dens[IX(x, y)] *= 0.99;
+		}
+	}
+
+	double densSum = 0;
+	for (int i = 0; i < dens.size(); ++i) {
+		densSum += dens[i];
+	}
+	densSum += 1;
+	std::cout << densSum << std::endl;
+	
+
+	/*for (int i = 0; i <= N; ++i) {
+		AddDens(10, i, 100);
+	}*/
 }
 
-void FluidSimulator::AddSource(int N, std::vector<float>& x, const std::vector<float>& s, float dT)
+void FluidSimulator::AddSource(int N, std::vector<double>& x, const std::vector<double>& s, double dT)
 {
 	int cell, size = (N + 2) * (N + 2);
 	for (cell = 0; cell < size; cell++) x[cell] += dT * s[cell];
 }
 
-void FluidSimulator::Diffuse(int N, BoundaryType b, std::vector<float>& x, const std::vector<float>& x0, float diff, float dt)
+void FluidSimulator::AddDens(int x, int y, float amt) {
+	dens[IX(x, y)] += glm::clamp(amt + (float) dens[IX(x, y)], 0.f, 1.f);
+}
+
+void FluidSimulator::AddVel(int x, int y, float amtX, float amtY) {
+	u[IX(x, y)] += amtX;
+	v[IX(x, y)] += amtY;
+}
+
+void FluidSimulator::Diffuse(int N, BoundaryType b, std::vector<double>& x, const std::vector<double>& x0, double diff, double dt)
 {
 	int i, j, k;
 	double a = dt * diff * N * N;
@@ -66,10 +127,10 @@ void FluidSimulator::Diffuse(int N, BoundaryType b, std::vector<float>& x, const
 
 }
 
-void FluidSimulator::Advect(int N, BoundaryType b, std::vector<float>& d, const std::vector<float>& d0, const std::vector<float>& u, const std::vector<float>& v, float dt)
+void FluidSimulator::Advect(int N, BoundaryType b, std::vector<double>& d, const std::vector<double>& d0, const std::vector<double>& u, const std::vector<double>& v, double dt)
 {
 	int i, j, i0, j0, i1, j1;
-	float x, y, s0, t0, s1, t1, dt0;
+	double x, y, s0, t0, s1, t1, dt0;
 	dt0 = dt * N;
 	for (i = 1; i <= N; i++) {
 		for (j = 1; j <= N; j++) {
@@ -84,17 +145,17 @@ void FluidSimulator::Advect(int N, BoundaryType b, std::vector<float>& d, const 
 	SetBoundaryConditions(N, b, d);
 }
 
-void FluidSimulator::DensStep(int N, std::vector<float>& x, std::vector<float>& x0, const std::vector<float>& u, const std::vector<float>& v, float diff, float dt)
+void FluidSimulator::DensStep(int N, std::vector<double>& x, std::vector<double>& x0, const std::vector<double>& u, const std::vector<double>& v, double diff, double dt)
 {
-	AddSource(N, x, x0, dt);
+	// AddSource(N, x, x0, dt);
 	SWAP(x,x0); 
 	Diffuse(N, BoundaryType::NONE, x, x0, diff, dt);
 	SWAP(x,x0); 
 	Advect(N, BoundaryType::NONE, x, x0, u, v, dt);
 }
 
-void FluidSimulator::VelStep(int N, std::vector<float>& u, std::vector<float>& v, std::vector<float>& u0, std::vector<float>& v0,
-	float visc, float dt) {
+void FluidSimulator::VelStep(int N, std::vector<double>& u, std::vector<double>& v, std::vector<double>& u0, std::vector<double>& v0,
+	double visc, double dt) {
 	AddSource(N, u, u0, dt); 
 	AddSource(N, v, v0, dt);
 
@@ -112,9 +173,9 @@ void FluidSimulator::VelStep(int N, std::vector<float>& u, std::vector<float>& v
 
 }
 
-void FluidSimulator::Project(int N, std::vector<float>& u, std::vector<float>& v, std::vector<float>& p, std::vector<float>& div) {
+void FluidSimulator::Project(int N, std::vector<double>& u, std::vector<double>& v, std::vector<double>& p, std::vector<double>& div) {
 	int i, j, k;
-	float h;
+	double h;
 	h = 1.0 / N;
 	for (i = 1; i <= N; i++) {
 		for (j = 1; j <= N; j++) {
@@ -124,7 +185,7 @@ void FluidSimulator::Project(int N, std::vector<float>& u, std::vector<float>& v
 		}
 	}
 	SetBoundaryConditions(N, BoundaryType::NONE, div); SetBoundaryConditions(N, BoundaryType::NONE, p);
-	for (k = 0; k < 20; k++) {
+	for (k = 0; k < 1; k++) {
 		for (i = 1; i <= N; i++) {
 			for (j = 1; j <= N; j++) {
 				p[IX(i, j)] = (div[IX(i, j)] + p[IX(i - 1, j)] + p[IX(i + 1, j)] +
@@ -143,7 +204,7 @@ void FluidSimulator::Project(int N, std::vector<float>& u, std::vector<float>& v
 }
 
 
-void FluidSimulator::SetBoundaryConditions(int N, BoundaryType b, std::vector<float>& x)
+void FluidSimulator::SetBoundaryConditions(int N, BoundaryType b, std::vector<double>& x)
 {
 	//todo: add wrapping boundary type
 	int i;
@@ -160,5 +221,27 @@ void FluidSimulator::SetBoundaryConditions(int N, BoundaryType b, std::vector<fl
 }
 
 void FluidSimulator::UpdateDensityTexture() {
-	//todo:: this
+	std::vector<float> gradient(N * N * 4); // RGBA as doubles
+	for(int y = 1; y <= N; ++y){
+		for (int x = 1; x <= N; ++x) {
+			double pixelDensity = dens[IX(x, y)] / 5.0;
+			int index = ((y-1) * N + (x-1)) * 4;
+			gradient[index] = pixelDensity;
+			gradient[index + 1] = pixelDensity;
+			gradient[index + 2] = pixelDensity;
+			if (pixelDensity > 1.1) {
+				gradient[index + 2] = 0;
+			}
+			gradient[index + 3] = 1;
+		}
+	}
+
+	//todo:: send to gpu. better ways to do this
+	glBindTexture(GL_TEXTURE_2D, densityTextureHandle);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, N, N, 0, GL_RGBA, GL_FLOAT, gradient.data());
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void FluidSimulator::SetDensityTextureHandle(GLuint handle) {
+	densityTextureHandle = handle;
 }
