@@ -6,7 +6,7 @@
 #include "circularSource.h"
 
 FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle) :
-	N(N), diffusion(0.001), viscosity(0), densityTextureHandle(densityTextureHandle), elemCount(N*N), densSources()
+	N(N), diffusion(0.0001), viscosity(0), densityTextureHandle(densityTextureHandle), elemCount(N*N), densSources()
 {
 	int gridSize = (N + 2) * (N + 2);
 	u.resize(gridSize);
@@ -31,7 +31,7 @@ FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle) :
 	}
 
 	// Add a circular density source at the center
-	densSources.push_back(CircularSource(N, N / 2, N / 2, 5, 100)); 
+	densSources.push_back(CircularSource(N, N / 2, N / 2, 5, 30)); 
 }
 
 const std::vector<double>& FluidSimulator::GetU() const
@@ -246,9 +246,10 @@ void FluidSimulator::UpdateDensityTexture() {
 			gradient[index] = pixelDensity;
 			gradient[index + 1] = pixelDensity;
 			gradient[index + 2] = pixelDensity;
-			if (pixelDensity > 1.1) {
-				gradient[index + 2] = 0;
-			}
+			// Change color of the fluid to yellow if density is higher than a threshold
+			//if (pixelDensity > 1.1) {
+			//	gradient[index + 2] = 0;
+			//}
 			gradient[index + 3] = 1;
 		}
 	}
