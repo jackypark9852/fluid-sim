@@ -222,9 +222,10 @@ void FluidSimulator::SetBoundaryConditions(int N, BoundaryType b, std::vector<do
 
 void FluidSimulator::UpdateDensityTexture() {
 	std::vector<float> gradient(N * N * 4); // RGBA as doubles
+
 	for(int y = 1; y <= N; ++y){
 		for (int x = 1; x <= N; ++x) {
-			double pixelDensity = dens[IX(x, y)] / 5.0;
+			double pixelDensity = dens[IX(x, y)] / 2.5;
 			int index = ((y-1) * N + (x-1)) * 4;
 			gradient[index] = pixelDensity;
 			gradient[index + 1] = pixelDensity;
