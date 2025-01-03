@@ -234,7 +234,7 @@ void MyGL::updateCamera() {
         return;
     }
     ImGuiIO& io = ImGui::GetIO();
-    if (ImGui::IsMousePosValid()) {
+    if (ImGui::IsMousePosValid() && ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
         if (ImGui::IsMouseDown(0)) {
             camera.RotateAboutGlobalUp(ImGui::GetMouseDragDelta().x);
             camera.RotateAboutLocalRight(-ImGui::GetMouseDragDelta().y);
