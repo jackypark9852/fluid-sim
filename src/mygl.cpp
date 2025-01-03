@@ -9,7 +9,8 @@ MyGL::MyGL(unsigned int windowWidth, unsigned int windowHeight):
     window(nullptr), imguiContext(nullptr), vao(0), 
     overlayShader(), quad(), testTextureHandle(-1),
     fluidSimulator(100, testTextureHandle),
-    camera(windowWidth, windowHeight)
+    camera(windowWidth, windowHeight),
+    velFieldShader(), arrow()
 {
     // fluidSimulator = FluidSimulator(100, testTextureHandle);
 }
@@ -18,7 +19,8 @@ MyGL::MyGL(const MyGL& other):
 	windowWidth(other.windowWidth), windowHeight(other.windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0),
     overlayShader(), quad(), testTextureHandle(-1),
-    camera(windowWidth, windowHeight)
+    camera(windowWidth, windowHeight),
+    velFieldShader(), arrow()
 {}
 
 MyGL::~MyGL() {
@@ -86,6 +88,7 @@ bool MyGL::InitializeGL() {
 
     // Initialize vbo data for quad
     quad.CreateVBOdata(); 
+    arrow.CreateVBOdata();
 
     // Setup Dear ImGui context (unique per instance)
     IMGUI_CHECKVERSION();
@@ -164,6 +167,7 @@ void MyGL::CleanUp() {
 
     // Destroy the compiled shaders 
     overlayShader.Destroy(); 
+    velFieldShader.Destroy();
 }
 
 bool MyGL::WindowShouldClose() {
@@ -171,7 +175,8 @@ bool MyGL::WindowShouldClose() {
 }
 
 bool MyGL::InitializeShaders() {
-    return overlayShader.Create("glsl/overlay.vert.glsl", "glsl/overlay.frag.glsl");
+    return overlayShader.Create("glsl/overlay.vert.glsl", "glsl/overlay.frag.glsl") 
+        && velFieldShader.Create("glsl/velField.vert.glsl", "glsl/velField.frag.glsl");
 }
 
 void MyGL::RenderTestImage()
@@ -225,6 +230,19 @@ void MyGL::RenderTestImage()
     // without being affected by depth buffer comparisons.
     glDisable(GL_DEPTH_TEST);
     overlayShader.Draw(quad);
+    glEnable(GL_DEPTH_TEST);
+
+    if (ImGui::IsKeyDown(ImGuiKey_V)) {
+        RenderVelocityField();
+    }
+}
+
+void MyGL::RenderVelocityField() {
+    // render velocity field
+    velFieldShader.useMe();
+    velFieldShader.SetUnifInt("u_Texture", 0);
+    glDisable(GL_DEPTH_TEST);
+    velFieldShader.Draw(arrow);
     glEnable(GL_DEPTH_TEST);
 }
 

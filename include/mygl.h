@@ -7,6 +7,7 @@
 #include "imgui_impl_opengl3.h"
 #include "shaderprogram.h"
 #include "quad.h"
+#include "arrow.h"
 #include "camera.h"
 #include <fluidsimulator.h>
 
@@ -21,6 +22,7 @@ private:
 	GLuint vao;
 
 	ShaderProgram overlayShader;
+	ShaderProgram velFieldShader;
 
 	Camera camera;
 	/// <summary>
@@ -29,6 +31,7 @@ private:
 	void updateCamera();
 
 	Quad quad; /// <summary> A quad that covers the full screen (e.g. background) </summary>
+	Arrow arrow; /// <summary> An arrow used for the velocity field display </summary>
 	GLuint testTextureHandle; /// <summary> The handle for the test texture created in RenderTestTexture() </summary>
 	FluidSimulator fluidSimulator;
 public: 
@@ -83,5 +86,10 @@ public:
 	/// Uses the overlay shader program to render a test image to the full screen quad 
 	/// </summary>
 	void RenderTestImage(); 
+
+	/// <summary>
+	/// Uses the velField shader program to render a velocity field
+	/// </summary>
+	void RenderVelocityField();
 };
 
