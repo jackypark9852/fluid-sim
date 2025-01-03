@@ -1,10 +1,12 @@
-#include "fluidsimulator.h"
 #include <imgui.h>
 #include <glm/glm.hpp>
 #include <iostream>
 
+#include "fluidsimulator.h"
+#include "circularSource.h"
+
 FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle) :
-	N(N), diffusion(0.001), viscosity(0), densityTextureHandle(densityTextureHandle), elemCount(N*N)
+	N(N), diffusion(0.001), viscosity(0), densityTextureHandle(densityTextureHandle), elemCount(N*N), densSources()
 {
 	int gridSize = (N + 2) * (N + 2);
 	u.resize(gridSize);
@@ -28,7 +30,8 @@ FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle) :
 		}
 	}
 
-	std::cout << "hello" << std::endl;
+	// Add a circular density source at the center
+	densSources.push_back(CircularSource(N, N / 2, N / 2, 5, 100)); 
 }
 
 const std::vector<double>& FluidSimulator::GetU() const
@@ -51,8 +54,8 @@ void FluidSimulator::Tick()
 	if (densityTextureHandle > 10) return;
 	double dt = 0.016;// ImGui::GetIO().DeltaTime;
 	//todo: fix hardcoded window size
-	int cursorX = ImGui::GetMousePos().x / 1920 * N;
-	int cursorY = (1 - ImGui::GetMousePos().y / 1080) * N;
+	int cursorX = ImGui::GetMousePos().x / 1200 * N;
+	int cursorY = (1 - ImGui::GetMousePos().y / 1200) * N;
 	//dens_prev[IX(cursorX, cursorY)] = 4;
 
 	VelStep(N, u, v, u_prev, v_prev, viscosity, dt);
@@ -92,10 +95,22 @@ void FluidSimulator::Tick()
 	}*/
 }
 
+GLuint FluidSimulator::GetDensityTextureHandle() const
+{
+	return densityTextureHandle;
+}
+
 void FluidSimulator::AddSource(int N, std::vector<double>& x, const std::vector<double>& s, double dT)
 {
 	int cell, size = (N + 2) * (N + 2);
 	for (cell = 0; cell < size; cell++) x[cell] += dT * s[cell];
+}
+
+void FluidSimulator::ApplyDensitySources(double dT)
+{
+	for (const DensitySource& densSource : densSources) {
+		AddSource(N, dens, densSource.GetSource(), dT);
+	}
 }
 
 void FluidSimulator::AddDens(int x, int y, float amt) {
@@ -148,6 +163,7 @@ void FluidSimulator::Advect(int N, BoundaryType b, std::vector<double>& d, const
 void FluidSimulator::DensStep(int N, std::vector<double>& x, std::vector<double>& x0, const std::vector<double>& u, const std::vector<double>& v, double diff, double dt)
 {
 	// AddSource(N, x, x0, dt);
+	ApplyDensitySources(dt); 
 	SWAP(x,x0); 
 	Diffuse(N, BoundaryType::NONE, x, x0, diff, dt);
 	SWAP(x,x0); 

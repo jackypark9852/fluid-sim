@@ -19,6 +19,12 @@
     <Filter Include="Source Files\glad">
       <UniqueIdentifier>{5150cf9c-cb91-42c1-9331-8bd748564c27}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\densitySource">
+      <UniqueIdentifier>{fa3c0fec-bd1d-4717-9797-1578ea5fd1bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\densitySource">
+      <UniqueIdentifier>{9031d6f6-4c4c-471d-8ec2-48b0722db1d1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -66,6 +72,12 @@
     <ClCompile Include="src\fluidsimulator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="include\densitySource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\circularSource.cpp">
+      <Filter>Source Files\densitySource</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\glm_includes.h">
@@ -85,6 +97,15 @@
     </ClInclude>
     <ClInclude Include="include\fluidsimulator.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\densitySource.h">
+      <Filter>Header Files\densitySource</Filter>
+    </ClInclude>
+    <ClInclude Include="include\circularSource.h">
+      <Filter>Header Files\densitySource</Filter>
+    </ClInclude>
+    <ClInclude Include="src\densitySource.h">
+      <Filter>Source Files\densitySource</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

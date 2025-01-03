@@ -9,6 +9,7 @@
 #include <vector>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "densitySource.h"
 
 enum class BoundaryType {
     NONE = 0,    // For scalar fields like density (no special reflection)
@@ -49,6 +50,9 @@ private:
     // Density values of the fluid at the previous time step
     std::vector<double> dens_prev;
 
+    // Density sources present in the current simulation 
+    std::vector<DensitySource> densSources; 
+
     double viscosity;
 
     double diffusion;
@@ -60,6 +64,14 @@ private:
     /// <param name="s">The source grid containing the values to add.</param>
     /// <param name="dT">The time step for scaling the source contribution.</param>
     void AddSource(int N, std::vector<double>& x, const std::vector<double>& s, double dT);
+
+    /// <summary>
+    /// Iterates through all active density sources in the simulation and updates the density grid by adding
+    /// the contributions from each source.
+    /// </summary>
+    /// <param name="dT">The time step used to scale the contributions from each source.</param>
+    void ApplyDensitySources(double dT);
+
 
     /// <summary>
     /// Adds amt density to the xy grid cell.

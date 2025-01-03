@@ -26,7 +26,7 @@ private:
 	FluidSimulator fluidSimulator;
 public: 
 	// Rule of Three
-	MyGL(unsigned int windowWidth = 1920, unsigned int windowHeight = 1080);
+	MyGL(unsigned int windowWidth = 1200, unsigned int windowHeight = 1200);
 	MyGL(const MyGL& other); 
 	~MyGL();
 	MyGL& operator=(const MyGL& other); 
