@@ -22,15 +22,15 @@ void Arrow::CreateVBOdata()
 
     GLuint idx[9]{0,1,2, 0,2,3, 4,5,6};
 
-    glm::vec4 scaleDown(0.05, 0.05, 1, 1);
+    glm::vec4 scaleDown(0.01, 0.01, 1, 1);
 
-    glm::vec4 vert_pos[7]{ glm::vec4(-0.2f,-0.5f,1.f,1.f),
-                          glm::vec4(0.2f,-0.5f,1.f,1.f),
-                          glm::vec4(0.2f,0.25f,1.f,1.f),
-                          glm::vec4(-0.2f,0.25f,1.f,1.f),
-                          glm::vec4(0.5, 0.25, 1.f, 1.f),
-                          glm::vec4(-0.5, 0.25, 1.f, 1.f),
-                          glm::vec4(0.f, 0.8, 1.f, 1.f)};
+    glm::vec4 vert_pos[7]{ glm::vec4(-0.2f,0.f,1.f,1.f),
+                          glm::vec4(0.2f,0.f,1.f,1.f),
+                          glm::vec4(0.2f,0.75f,1.f,1.f),
+                          glm::vec4(-0.2f,0.75f,1.f,1.f),
+                          glm::vec4(0.5, 0.75, 1.f, 1.f),
+                          glm::vec4(-0.5, 0.75, 1.f, 1.f),
+                          glm::vec4(0.f, 1.3, 1.f, 1.f)};
 
     for (auto& vec : vert_pos) {
         vec *= scaleDown;

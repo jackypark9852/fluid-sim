@@ -268,7 +268,8 @@ void MyGL::RenderVelocityField() {
     glBindTexture(GL_TEXTURE_2D, velocityTextureHandle);
     velFieldShader.SetUnifInt("u_Texture", 1);
     glDisable(GL_DEPTH_TEST);
-    velFieldShader.Draw(arrow);
+    // TODO: Set this 100 * 100 to a var that's connected to the fluidism
+    velFieldShader.DrawInstanced(arrow, 100 * 100);
     glEnable(GL_DEPTH_TEST);
 }
 
