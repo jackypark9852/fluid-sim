@@ -9,17 +9,20 @@ MyGL::MyGL(unsigned int windowWidth, unsigned int windowHeight):
     window(nullptr), imguiContext(nullptr), vao(0), 
     overlayShader(), quad(), testTextureHandle(-1),
     fluidSimulator(100, testTextureHandle),
-    camera(windowWidth, windowHeight)
+    camera(windowWidth, windowHeight), sceneSelector(), scenes()
 {
     // fluidSimulator = FluidSimulator(100, testTextureHandle);
+    InitializeScenes(); 
 }
 
 MyGL::MyGL(const MyGL& other):
 	windowWidth(other.windowWidth), windowHeight(other.windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0),
     overlayShader(), quad(), testTextureHandle(-1),
-    camera(windowWidth, windowHeight)
-{}
+    camera(windowWidth, windowHeight), sceneSelector(), scenes() 
+{
+    InitializeScenes(); 
+}
 
 MyGL::~MyGL() {
 	CleanUp(); 
@@ -108,14 +111,7 @@ void MyGL::PaintGL() {
 
     // Poll for and process events
     glfwPollEvents();
-
-    // Start the Dear ImGui frame
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    // Example: Show ImGui demo window
-    ImGui::ShowDemoWindow();
+    ShowImGuiWindow();
 
     // Handle mouse events for camera functions
     // TODO: move this somewhere more appropriate, but we don't have a Tick() yet().
@@ -133,6 +129,36 @@ void MyGL::PaintGL() {
 
     // Swap front and back buffers
     glfwSwapBuffers(window);
+}
+
+void MyGL::ShowImGuiWindow()
+{
+    // Start the Dear ImGui frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    // Example: Show ImGui demo window
+    //ImGui::ShowDemoWindow();
+    // We specify a default position/size in case there's no data in the .ini file.
+    // We only do it to make the demo applications a little more welcoming, but typically this isn't required.
+    const ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 650, main_viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_FirstUseEver);
+
+    // Main body of the Demo window starts here.
+    if (!ImGui::Begin("Dear ImGui Demo"))
+    {
+        // Early out if the window is collapsed, as an optimization.
+        ImGui::End();
+        return;
+    }
+
+    // Most "big" widgets share a common width settings by default. See 'Demo->Layout->Widgets Width' for details.
+    ImGui::PushItemWidth(ImGui::GetFontSize() * -12);           // e.g. Leave a fixed amount of width for labels (by passing a negative value), the rest goes to widgets.
+    //ImGui::PushItemWidth(-ImGui::GetWindowWidth() * 0.35f);   // e.g. Use 2/3 of the space for widgets and 1/3 for labels (right align)
+    sceneSelector.ShowUI();
+    ImGui::End();
 }
 
 void MyGL::ResizeGL(unsigned int windowWidth, unsigned int windowHeight) {
@@ -228,6 +254,18 @@ void MyGL::RenderTestImage()
     glEnable(GL_DEPTH_TEST);
 }
 
+void MyGL::InitializeScenes()
+{
+    // Create two empty scenes and add them to the scene selector to test scene selection functionarlity
+    const char* emptySceneName1 = "Empty Scene 1"; 
+    scenes[emptySceneName1] = Scene(emptySceneName1);
+    sceneSelector.addScene(scenes[emptySceneName1]);
+
+    const char* emptySceneName2 = "Empty Scene 2";
+    scenes[emptySceneName2] = Scene(emptySceneName2);
+    sceneSelector.addScene(scenes[emptySceneName2]);
+}
+
 void MyGL::updateCamera() {
     // Can add scalars to these values to adjust transform speeds
     if (!imguiContext) {
@@ -245,6 +283,6 @@ void MyGL::updateCamera() {
         }
         if (io.MouseWheel) {
             camera.Zoom(io.MouseWheel * 0.2f);
-        }
+        }                 
     }
 }
