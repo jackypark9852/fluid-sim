@@ -28,7 +28,7 @@ FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle, GLui
 
 			}
 
-			u[IX(x, y)] = 1;
+			//u[IX(x, y)] = 1;
 		}
 	}
 
@@ -45,6 +45,8 @@ FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle, GLui
 
 	// Velocity Source 2: Pushes smoke from the right source to the left
 	velSources.push_back(RectVelocitySource(N, 20, 20, 3 * N / 4 - 10, N / 2 - 10, -0.1, 0));
+
+	//velSources.push_back(RectVelocitySource(N, N / 2, N, N / 4, N / 2, 1.f, 0.1));
 }
 
 const std::vector<double>& FluidSimulator::GetU() const
@@ -103,7 +105,7 @@ void FluidSimulator::Tick()
 		densSum += dens[i];
 	}
 	densSum += 1;
-	std::cout << densSum << std::endl;
+	// std::cout << densSum << std::endl;
 	
 
 	/*for (int i = 0; i <= N; ++i) {
@@ -276,10 +278,6 @@ void FluidSimulator::UpdateDensityTexture() {
 			gradient[index] = pixelDensity;
 			gradient[index + 1] = pixelDensity;
 			gradient[index + 2] = pixelDensity;
-			// Change color of the fluid to yellow if density is higher than a threshold
-			//if (pixelDensity > 1.1) {
-			//	gradient[index + 2] = 0;
-			//}
 			gradient[index + 3] = 1;
 		}
 	}
@@ -299,12 +297,14 @@ void FluidSimulator::UpdateVelocityTexture() {
 
 	for (int y = 1; y <= N; ++y) {
 		for (int x = 1; x <= N; ++x) {
-			glm::vec3 pixelVelocity = glm::vec3(u[IX(x, y)], v[IX(x, y)], 0.f);
+			glm::vec3 pixelVelocity = glm::vec3(u[IX(x, y)], v[IX(x, y)], 0);
 			int index = ((y - 1) * N + (x - 1)) * 4;
-			field[index] = pixelVelocity.x;
-			field[index + 1] = pixelVelocity.y;
-			field[index + 2] = pixelVelocity.z;
-			field[index + 3] = 1;
+			// mapping the vector vals [-1, 1] to [0, 1]
+			field[index] = (glm::normalize(pixelVelocity).x + 1.f) * 0.5;
+			field[index + 1] = (glm::normalize(pixelVelocity).y + 1.f) * 0.5;
+			field[index + 2] = (glm::normalize(pixelVelocity).z + 1.f) * 0.5;
+			// storing original length, dividing by 10 to ensure it is between 0 and 1, might need to change later
+			field[index + 3] = glm::length(pixelVelocity) / 10.f;
 		}
 	}
 

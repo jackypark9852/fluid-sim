@@ -35,6 +35,8 @@ private:
 	GLuint testTextureHandle; /// <summary> The handle for the test texture created in RenderTestTexture() </summary>
 	GLuint velocityTextureHandle; /// <summary> The handle for the velocity field texture created in RenderVelocityField() </summary>
 	FluidSimulator fluidSimulator;
+
+	void TestVelField();
 public:
 	// Rule of Three
 	MyGL(unsigned int windowWidth = 1200, unsigned int windowHeight = 1200);

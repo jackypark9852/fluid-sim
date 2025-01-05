@@ -233,8 +233,43 @@ void MyGL::RenderTestImage()
     glEnable(GL_DEPTH_TEST);
 
     if (ImGui::IsKeyDown(ImGuiKey_V)) {
+        
+        if (ImGui::IsKeyDown(ImGuiKey_LeftShift)) {
+            TestVelField();
+        }
         RenderVelocityField();
     }
+}
+void MyGL::TestVelField() {
+    if (velocityTextureHandle == -1) {
+        const int textureWidth = 512;
+        const int textureHeight = 512;
+
+        // Generate and bind a texture
+        glGenTextures(1, &velocityTextureHandle);
+        glBindTexture(GL_TEXTURE_2D, velocityTextureHandle);
+
+        // Set texture parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        //Set fluid sim handle
+        fluidSimulator.SetVelocityTextureHandle(velocityTextureHandle);
+    }
+
+    // render velocity field
+    overlayShader.useMe();
+
+    // Bind the texture for rendering
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, velocityTextureHandle);
+    overlayShader.SetUnifInt("u_Texture", 1);
+    glDisable(GL_DEPTH_TEST);
+    // TODO: Set this 100 * 100 to a var that's connected to the fluidism
+    overlayShader.Draw(quad);// , 100 * 100);
+    glEnable(GL_DEPTH_TEST);
 }
 
 void MyGL::RenderVelocityField() {
@@ -252,9 +287,6 @@ void MyGL::RenderVelocityField() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        // Unbind the texture
-        glBindTexture(GL_TEXTURE_2D, 0);
 
         //Set fluid sim handle
         fluidSimulator.SetVelocityTextureHandle(velocityTextureHandle);

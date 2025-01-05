@@ -2,14 +2,12 @@
 
 out vec4 out_Color; // Output color of the fragment shader
 
-uniform sampler2D u_Texture; // Sampler for the texture
+in vec4 fs_vel;
 
 void main()
 {
-    // Sample the texture at the given coordinates and output the color
-    // out_Color = texture(u_Texture, fs_UV);
-    // vel at 25, 50
-    vec4 vel = texture(u_Texture, vec2(0.2, 0.1));
-    //out_Color = vec4(vel.r, vel.g, vel.b, 1);
-    out_Color = vec4(1, 0, 0, 1);
+    vec4 shortCol = vec4(0, 0.8, 0.4, 1);
+    vec4 longCol = vec4(1, 0.1, 0.1, 1); 
+
+    out_Color = mix(shortCol, longCol, fs_vel.a * 50.f);  
 }
