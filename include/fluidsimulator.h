@@ -1,9 +1,9 @@
 #pragma once
 
-// Macro for accessing a 1D array with 3D-like syntax. This maps 3D indices (x, y, z) 
+// Macro for accessing a 1D array with 2D-like syntax. This maps 2D indices (i, j) 
 // to a 1D index in a flattened array. The grid includes a boundary, 
-// so its actual dimensions are (N+2) x (N+2) x (N+2).
-#define IX(x,y,z) ((x) + (N + 2) * (y) + (N+2)*(N+2)*z)
+// so its actual dimensions are (N+2) x (N+2).
+#define IX(i, j) ((i) + (N + 2) * (j))
 
 
 #include <vector>
@@ -15,8 +15,7 @@
 enum class BoundaryType {
     NONE = 0,    // For scalar fields like density (no special reflection)
     HORIZONTAL,  // For horizontal velocity (u)
-    VERTICAL,     // For vertical velocity (v)
-    FORWARD // for Forward Velocity (w)
+    VERTICAL     // For vertical velocity (v)
 };
 
 static void SWAP(std::vector<double>& x0, std::vector<double>& x) {
@@ -45,12 +44,6 @@ private:
 
     // Vertical velocity components of the fluid at the previous time step
     std::vector<double> v_prev;
-
-    //Forward velocity components of the fluid at the current time step
-    std::vector<double>& w;
-
-    //Forward velocity components of the fluid at the previous time step
-    std::vector<double>& w_prev;
 
     // Density values of the fluid at the current time step
     std::vector<double> dens;
@@ -127,9 +120,9 @@ private:
     /// <param name="d0">The grid containing the initial values before advection.</param>
     /// <param name="u">The horizontal velocity field.</param>
     /// <param name="v">The vertical velocity field.</param>
-    /// <param name="w">The forward velocity field.</param>
     /// <param name="dt">The time step over which advection occurs.</param>
-    void Advect(int N, BoundaryType b, std::vector<double>& d, const std::vector<double>& d0, const std::vector<double>& u, const std::vector<double>& v, const std::vector<double>& w, double dt);
+    void Advect(int N, BoundaryType b, std::vector<double>& d, const std::vector<double>& d0, const std::vector<double>& u,
+        const std::vector<double>& v, double dt);
 
     /// <summary>
     /// Performs a full simulation step for the density field, including diffusion and advection.
@@ -166,7 +159,8 @@ private:
     /// <param name="p"></param>
     /// <param name="div"></param>
     /// todo: documentation here 
-    void Project(int N, std::vector<double>& u, std::vector<double>& v, std::vector<double>& w, std::vector<double>& p, std::vector<double>& div);
+    void Project(int N, std::vector<double>& u, std::vector<double>& v, std::vector<double>& p, std::vector<double>& div);
+
     /// <summary>
     /// Applies boundary conditions to a scalar field on the simulation grid.
     /// </summary>
