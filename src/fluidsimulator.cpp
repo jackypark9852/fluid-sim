@@ -87,10 +87,12 @@ void FluidSimulator::Tick()
 			AddDens(cursorX, cursorY, abs((dragVec.x + dragVec.y) * 100));
 		}
 	}
-	else if (ImGui::IsMouseDragging(1) && !ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
+	if (ImGui::IsMouseDragging(1) && !ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
 		ImVec2 dragVec = ImGui::GetMouseDragDelta(1);
 		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N) {
-			AddVel(cursorX, cursorY, dragVec.x * 0.001, dragVec.y * 0.001);
+			float dragStartX = cursorX - (dragVec.x / 1200 * N);
+			float dragStartY = cursorY - ((1 - dragVec.y) / 1200) * N;
+			AddVel(dragStartX, dragStartY, dragVec.x * 0.001, dragVec.y * -0.001);
 		}
 	}
 
