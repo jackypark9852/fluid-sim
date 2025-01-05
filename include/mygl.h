@@ -8,6 +8,7 @@
 #include "shaderprogram.h"
 #include "quad.h"
 #include "camera.h"
+#include "ui/sceneselector.h"
 #include <fluidsimulator.h>
 
 class MyGL
@@ -31,6 +32,8 @@ private:
 	Quad quad; /// <summary> A quad that covers the full screen (e.g. background) </summary>
 	GLuint testTextureHandle; /// <summary> The handle for the test texture created in RenderTestTexture() </summary>
 	FluidSimulator fluidSimulator;
+	SceneSelector sceneSelector; /// <summary> An ImGui UI element for selecting the currently active scene in the simulationJKO </summary>
+	
 public: 
 	// Rule of Three
 	MyGL(unsigned int windowWidth = 1200, unsigned int windowHeight = 1200);
@@ -47,7 +50,12 @@ public:
 	/// <summary>
 	/// Clears the active window and renders scene and UI. 
 	/// </summary>
-	void PaintGL(); 
+	void PaintGL();
+
+	/// <summary>
+	/// Creates an ImGui window and draws debug ui
+	/// </summary>
+	void ShowImGuiWindow();
 	
 	/// <summary>
 	/// Called whenever the window is resized. 

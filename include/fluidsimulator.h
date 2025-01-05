@@ -5,12 +5,14 @@
 // so its actual dimensions are (N+2) x (N+2).
 #define IX(i, j) ((i) + (N + 2) * (j))
 
-
 #include <vector>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "densitySource.h"
 #include "velocitysource.h"
+#include "scenes/scene.h" 
+#include <map>
+#include <string>
 
 enum class BoundaryType {
     NONE = 0,    // For scalar fields like density (no special reflection)
@@ -56,6 +58,12 @@ private:
     
     // Velocity sources present in the current simulation
     std::vector<VelocitySource> velSources; 
+
+    /// A map that matches the scene's name to the scenes avalible in the simulation </summary>
+    std::map<std::string, Scene> scenes;
+
+    /// The scene that is currently active. 
+    Scene* activeScene; 
 
     double viscosity;
 
@@ -174,14 +182,20 @@ private:
     /// </summary>
     void UpdateDensityTexture();
 
+    /// <summary>
+    /// Initializes the set of availible scenes for the fluid simulator. 
+    /// At any time, one of these scenes will be selected using tehe SceneSelector UI component, 
+    /// and the selection will be passed onto the FluidSimulator.
+    /// </summary>
+    void InitializeScenes();
+
 public: 
     /// <summary>
     /// Constructs a FluidSimulator object with a grid size of (N+2) x (N+2), 
     /// including boundary cells.
     /// </summary>
     /// <param name="N">The width (and height) of the inner grid, excluding boundary cells. Defaults to 100.</param>
-    FluidSimulator(unsigned int N = 100, GLuint densityTextureHandle = -1);
-
+    FluidSimulator(unsigned int N = 1000, GLuint densityTextureHandle = -1);
 
     /// <summary>
     /// Gets the current horizontal velocity components of the fluid.
@@ -217,5 +231,25 @@ public:
     /// </summary>
     /// <param name="handle"></param> handle
     void SetDensityTextureHandle(GLuint handle);
+
+    /// <summary>
+    /// Retrieves a vector containing string literals of the scenes in the simulation. 
+    /// </summary>
+    /// <returns> A vector of scene name strings. </returns>
+    std::vector<std::string> GetSceneNames() const; 
+    
+    /// <summary>
+    /// Activates the scene with the matching name. 
+    /// Does nothing if no scene matching the name "sceneName" exists. 
+    /// </summary>
+    /// <param name="sceneName"> The string literal containing the name of the scene to be activated. </param>
+    void ActivateSceneByName(const std::string& sceneName); 
+
+    /// <summary>
+    /// Clears the current velocity and density fields by resetting the vectors to their initial state.
+    /// This function sets the current and previous velocity and density components (u, v, dens) to zero or the default value.
+    /// </summary>
+    void Reset();
+
 };
             
