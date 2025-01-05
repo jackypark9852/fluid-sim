@@ -9,7 +9,7 @@
 FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle) :
 	N(N), diffusion(0.0001), viscosity(0), densityTextureHandle(densityTextureHandle), elemCount(N*N), densSources()
 {
-	int gridSize = (N + 2) * (N + 2);
+	int gridSize = (N + 2) * (N + 2) * (N + 2);
 	u.resize(gridSize);
 	v.resize(gridSize);
 	u_prev.resize(gridSize);
@@ -134,27 +134,25 @@ void FluidSimulator::ApplyVelocitySources(double dT)
 }
 
 void FluidSimulator::AddDens(int x, int y, float amt) {
-	dens[IX(x, y)] += glm::clamp(amt + (float) dens[IX(x, y)], 0.f, 1.f);
+	dens[IX(x, y,1)] += glm::clamp(amt + (float) dens[IX(x, y,1)], 0.f, 1.f);
 }
 
 void FluidSimulator::AddVel(int x, int y, float amtX, float amtY) {
-	u[IX(x, y)] += amtX;
-	v[IX(x, y)] += amtY;
+	u[IX(x, y, 1)] += amtX;
+	v[IX(x, y, 1)] += amtY;
 }
 
 void FluidSimulator::Diffuse(int N, BoundaryType b, std::vector<double>& x, const std::vector<double>& x0, double diff, double dt)
 {
-	int i, j, k;
+	int i, j, z, k;
 	double a = dt * diff * N * N;
 	//todo: the 20 here is essentially our time step. It should be a function of grid meter size, not a constant.
 	for (k = 0; k < 20; k++) {
-		for (i = 1; i <= N; i++) {
-			for (j = 1; j <= N; j++) {
-				double initial = x[IX(i, j)];
-				double check = (x0[IX(i, j)] + a * (x[IX(i - 1, j)] + x[IX(i + 1, j)] +
-					x[IX(i, j - 1)] + x[IX(i, j + 1)])) / (1 + 4 * a);
-				x[IX(i, j)] = (x0[IX(i, j)] + a * (x[IX(i - 1, j)] + x[IX(i + 1, j)] +
-					x[IX(i, j - 1)] + x[IX(i, j + 1)])) / (1 + 4 * a);
+		for (i = 1; i <= N; ++i) {
+			for (j = 1; j <= N; ++j) {
+				for(z = 1; z <= N; ++z)
+				x[IX(i, j, z)] = (x0[IX(i, j, z)] + a * (x[IX(i - 1, j, z)] + x[IX(i + 1, j, z)] +
+					x[IX(i, j - 1, z)] + x[IX(i, j + 1, z)] + x[IX(i, j, z -1)] + +x[IX(i, j, z + 1)])) / (1 + 6 * a);
 			}
 		}
 		SetBoundaryConditions(N, b, x);
@@ -162,22 +160,38 @@ void FluidSimulator::Diffuse(int N, BoundaryType b, std::vector<double>& x, cons
 
 }
 
-void FluidSimulator::Advect(int N, BoundaryType b, std::vector<double>& d, const std::vector<double>& d0, const std::vector<double>& u, const std::vector<double>& v, double dt)
+void FluidSimulator::Advect(int N, BoundaryType b, std::vector<double>& d, const std::vector<double>& d0, const std::vector<double>& u, const std::vector<double>& v, const std::vector<double>& w, double dt)
 {
-	int i, j, i0, j0, i1, j1;
-	double x, y, s0, t0, s1, t1, dt0;
+	/*
+	int i, j, k, i0, j0, k0, i1, j1, k1;
+	double x, y, z, s0, t0, c0, s1, t1, c1, dt0;
 	dt0 = dt * N;
-	for (i = 1; i <= N; i++) {
-		for (j = 1; j <= N; j++) {
-			x = i - dt0 * u[IX(i, j)]; y = j - dt0 * v[IX(i, j)];
+	for (i = 1; i <= N; ++i) {
+		for (j = 1; j <= N; ++j) {
+			for(k = 1; k <= N; ++k)
+			x = i - dt0 * u[IX(i, j, k)]; 
+			y = j - dt0 * v[IX(i, j, k)];
+			z = k - dt0 * v[IX(i, j, k)];
+
 			if (x < 0.5) x = 0.5; if (x > N + 0.5) x = N + 0.5; i0 = (int)x; i1 = i0 + 1;
 			if (y < 0.5) y = 0.5; if (y > N + 0.5) y = N + 0.5; j0 = (int)y; j1 = j0 + 1;
-			s1 = x - i0; s0 = 1 - s1; t1 = y - j0; t0 = 1 - t1;
-			d[IX(i, j)] = s0 * (t0 * d0[IX(i0, j0)] + t1 * d0[IX(i0, j1)]) +
-				s1 * (t0 * d0[IX(i1, j0)] + t1 * d0[IX(i1, j1)]);
+			if (z < 0.5) z = 0.5; if (z > N + 0.5) z = N + 0.5; k0 = (int)z; k1 = k0 + 1;
+
+
+			s1 = x - i0; s0 = 1 - s1; 
+			t1 = y - j0; t0 = 1 - t1;
+			c1 = z - k0; c0 = 1 - c1;
+
+
+			d[IX(i, j, k)] = 
+				c0 * s0 * (t0 * d0[IX(i0, j0, k0)] + 
+				t1 * d0[IX(i0, j1, k0)]) +
+				s1 * (t0 * d0[IX(i1, j0, k0)] + 
+				t1 * d0[IX(i1, j1)]);
 		}
 	}
 	SetBoundaryConditions(N, b, d);
+	*/
 }
 
 void FluidSimulator::DensStep(int N, std::vector<double>& x, std::vector<double>& x0, const std::vector<double>& u, const std::vector<double>& v, double diff, double dt)
@@ -187,7 +201,7 @@ void FluidSimulator::DensStep(int N, std::vector<double>& x, std::vector<double>
 	SWAP(x,x0); 
 	Diffuse(N, BoundaryType::NONE, x, x0, diff, dt);
 	SWAP(x,x0); 
-	Advect(N, BoundaryType::NONE, x, x0, u, v, dt);
+	Advect(N, BoundaryType::NONE, x, x0, u, v, w, dt);
 }
 
 void FluidSimulator::VelStep(int N, std::vector<double>& u, std::vector<double>& v, std::vector<double>& u0, std::vector<double>& v0,
@@ -210,31 +224,39 @@ void FluidSimulator::VelStep(int N, std::vector<double>& u, std::vector<double>&
 
 }
 
-void FluidSimulator::Project(int N, std::vector<double>& u, std::vector<double>& v, std::vector<double>& p, std::vector<double>& div) {
-	int i, j, k;
+void FluidSimulator::Project(int N, std::vector<double>& u, std::vector<double>& v, std::vector<double>& w, std::vector<double>& p, std::vector<double>& div) {
+	int i, j, k, timeStep;
 	double h;
 	h = 1.0 / N;
 	for (i = 1; i <= N; i++) {
 		for (j = 1; j <= N; j++) {
-			div[IX(i, j)] = -0.5 * h * (u[IX(i + 1, j)] - u[IX(i - 1, j)] +
-				v[IX(i, j + 1)] - v[IX(i, j - 1)]);
-			p[IX(i, j)] = 0;
+			for (k = 1; k <= N; ++k) {
+				div[IX(i, j,k)] = -0.33 * h * (u[IX(i + 1, j,k)] - u[IX(i - 1, j,k)] +
+					v[IX(i, j + 1,k)] - v[IX(i, j - 1,k)] + w[IX(i,j,k+1) - w[IX(i,j,k-1)]]);
+				p[IX(i, j, k)] = 0;
+			}
 		}
 	}
 	SetBoundaryConditions(N, BoundaryType::NONE, div); SetBoundaryConditions(N, BoundaryType::NONE, p);
-	for (k = 0; k < 1; k++) {
+	for (timeStep = 0; timeStep < 20; ++timeStep) {
 		for (i = 1; i <= N; i++) {
 			for (j = 1; j <= N; j++) {
-				p[IX(i, j)] = (div[IX(i, j)] + p[IX(i - 1, j)] + p[IX(i + 1, j)] +
-					p[IX(i, j - 1)] + p[IX(i, j + 1)]) / 4;
+				for (k = 1; k <= N; ++k) {
+					p[IX(i, j,k)] = (div[IX(i, j,k)] + p[IX(i - 1, j, k)] + p[IX(i + 1, j, k)] +
+						p[IX(i, j - 1, k)] + p[IX(i, j + 1, k)] + p[IX(i,j,k-1)] + p[IX(i,j,k+1)]) / 6;
+				}
 			}
 		}
 		SetBoundaryConditions(N, BoundaryType::NONE, p);
 	}
 	for (i = 1; i <= N; i++) {
 		for (j = 1; j <= N; j++) {
-			u[IX(i, j)] -= 0.5 * (p[IX(i + 1, j)] - p[IX(i - 1, j)]) / h;
-			v[IX(i, j)] -= 0.5 * (p[IX(i, j + 1)] - p[IX(i, j - 1)]) / h;
+			for (k = 1; k <= N; ++k) {
+				u[IX(i, j,k)] -= 0.5 * (p[IX(i + 1, j,k)] - p[IX(i - 1, j,k)]) / h;
+				v[IX(i, j, k)] -= 0.5 * (p[IX(i, j + 1,k)] - p[IX(i, j - 1, k)]) / h;
+				w[IX(i, j, k)] -= 0.5 * (p[IX(i, j, k+1)] - p[IX(i, j, k - 1)]) / h;
+
+			}
 		}
 	}
 	SetBoundaryConditions(N, BoundaryType::HORIZONTAL, u); SetBoundaryConditions(N, BoundaryType::VERTICAL, v);
@@ -244,17 +266,24 @@ void FluidSimulator::Project(int N, std::vector<double>& u, std::vector<double>&
 void FluidSimulator::SetBoundaryConditions(int N, BoundaryType b, std::vector<double>& x)
 {
 	//todo: add wrapping boundary type
-	int i;
-	for (i = 1; i <= N; i++) {
-		x[IX(0, i)] = b == BoundaryType::HORIZONTAL ? x[IX(1, i)] * -1 : x[IX(1, i)];
-		x[IX(N + 1, i)] = b == BoundaryType::HORIZONTAL ? x[IX(N, i)] * -1 : x[IX(N, i)];
-		x[IX(i, 0)] = b == BoundaryType::VERTICAL ? x[IX(i, 1)] * -1 : x[IX(i, 1)];
-		x[IX(i, N + 1)] = b == BoundaryType::VERTICAL ? x[IX(i, N)] * -1 : x[IX(i, N)];
+	int i, j;
+	for (i = 1; i <= N; ++i) {
+		for (j = 1; j <= N; ++j) {
+			x[IX(0, i, j)] = b == BoundaryType::HORIZONTAL ? x[IX(1, i, j)] * -1 : x[IX(1, i, j)];
+			x[IX(N + 1, i, j)] = b == BoundaryType::HORIZONTAL ? x[IX(N, i, j)] * -1 : x[IX(N, i, j)];
+
+			x[IX(i, 0, j)] = b == BoundaryType::VERTICAL ? x[IX(i, 1, j)] * -1 : x[IX(i, 1, j)];
+			x[IX(i, N + 1, j)] = b == BoundaryType::VERTICAL ? x[IX(i, N,j)] * -1 : x[IX(i, N,j)];
+
+			x[IX(i, j,0)] = b == BoundaryType::FORWARD ? x[IX(i, j, 1)] * -1 : x[IX(i, j, 1)];
+			x[IX(i, j, N + 1)] = b == BoundaryType::FORWARD ? x[IX(i, j, N)] * -1 : x[IX(i, j, N)];
+		}
 	}
-	x[IX(0, 0)] = 0.5 * (x[IX(1, 0)] + x[IX(0, 1)]);
-	x[IX(0, N + 1)] = 0.5 * (x[IX(1, N + 1)] + x[IX(0, N)]);
-	x[IX(N + 1, 0)] = 0.5 * (x[IX(N, 0)] + x[IX(N + 1, 1)]);
-	x[IX(N + 1, N + 1)] = 0.5 * (x[IX(N, N + 1)] + x[IX(N + 1, N)]);
+	x[IX(0, 0, 0)] = 0.33 * (x[IX(1, 0, 0)] + x[IX(0, 1, 0)] + x[IX(0, 0, 1)]);
+	x[IX(0, N + 1, 0)] = 0.33 * (x[IX(1, N + 1, 0)] + x[IX(0, N, 0)] + x[IX(0, N + 1, 1)]);
+	x[IX(N + 1, 0, 0)] = 0.33 * (x[IX(N, 0, 0)] + x[IX(N + 1, 1, 0)] + x[IX(N + 1, 0, 1)]);
+	x[IX(0, 0, N + 1)] = 0.33 * (x[IX(0, 0, N)] + x[IX(0, 1, N + 1)] + x[IX(1, 0, N + 1)]);
+	x[IX(N + 1, N + 1, N + 1)] = 0.33 * (x[IX(N, N + 1, N)] + x[IX(N + 1, N, N)] + x[IX(N, N, N + 1)]);
 }
 
 void FluidSimulator::UpdateDensityTexture() {
