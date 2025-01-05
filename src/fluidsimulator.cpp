@@ -331,8 +331,6 @@ void FluidSimulator::ActivateSceneByName(const std::string& sceneName)
 		for (const VelocitySource& velSource : activeScene->GetVelocitySources()) {
 			velSources.push_back(velSource); 
 		}
-
-		std::cout << sceneName << " activated!" << std::endl; 
 	}	
 }
 
