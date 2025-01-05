@@ -9,6 +9,7 @@
 #include "quad.h"
 #include "arrow.h"
 #include "camera.h"
+#include "ui/sceneselector.h"
 #include <fluidsimulator.h>
 
 class MyGL
@@ -35,9 +36,10 @@ private:
 	GLuint testTextureHandle; /// <summary> The handle for the test texture created in RenderTestTexture() </summary>
 	GLuint velocityTextureHandle; /// <summary> The handle for the velocity field texture created in RenderVelocityField() </summary>
 	FluidSimulator fluidSimulator;
-
-	void TestVelField();
-public:
+	
+	SceneSelector sceneSelector; /// <summary> An ImGui UI element for selecting the currently active scene in the simulationJKO </summary>
+	
+public: 
 	// Rule of Three
 	MyGL(unsigned int windowWidth = 1200, unsigned int windowHeight = 1200);
 	MyGL(const MyGL& other);
@@ -55,6 +57,11 @@ public:
 	/// </summary>
 	void PaintGL();
 
+	/// <summary>
+	/// Creates an ImGui window and draws debug ui
+	/// </summary>
+	void ShowImGuiWindow();
+	
 	/// <summary>
 	/// Called whenever the window is resized. 
 	/// Adjusts parameters dependent on window size such as perspective matrix. 
@@ -94,5 +101,10 @@ public:
 	/// Uses the velField shader program to render a velocity field
 	/// </summary>
 	void RenderVelocityField();
+
+	/// <summary>
+	/// Displays the velocity field's normal map
+	/// </summary>
+	void TestVelField();
 };
 

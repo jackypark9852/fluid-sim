@@ -19,10 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="include\densitysource.cpp" />
-    <ClCompile Include="include\rectvelocitysource.cpp" />
-    <ClCompile Include="include\velocitysource.cpp" />
     <ClCompile Include="src\arrow.cpp" />
+    <ClCompile Include="src\densitysource.cpp" />
+    <ClCompile Include="src\rectvelocitysource.cpp" />
+    <ClCompile Include="src\scenes\waterfountainscene.cpp" />
+    <ClCompile Include="src\scenes\whirlwindscene.cpp" />
+    <ClCompile Include="src\scenes\crosswindsscene.cpp" />
+    <ClCompile Include="src\velocitysource.cpp" />
     <ClCompile Include="src\circularsource.cpp" />
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\drawable.cpp" />
@@ -30,7 +33,9 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\mygl.cpp" />
     <ClCompile Include="src\quad.cpp" />
+    <ClCompile Include="src\scenes\scene.cpp" />
     <ClCompile Include="src\shaderprogram.cpp" />
+    <ClCompile Include="src\ui\sceneselector.cpp" />
     <ClCompile Include="thirdParty\glad.c" />
     <ClCompile Include="thirdParty\imgui-master\imgui.cpp" />
     <ClCompile Include="thirdParty\imgui-master\imgui_demo.cpp" />
@@ -52,7 +57,13 @@
     <ClInclude Include="include\mygl.h" />
     <ClInclude Include="include\quad.h" />
     <ClInclude Include="include\rectvelocitysource.h" />
+    <ClInclude Include="include\scenes\crosswindsscene.h" />
+    <ClInclude Include="include\scenes\scene.h" />
+    <ClInclude Include="include\scenes\waterfountainscene.h" />
+    <ClInclude Include="include\scenes\whirlwindscene.h" />
     <ClInclude Include="include\shaderprogram.h" />
+    <ClInclude Include="include\ui\imguiui.h" />
+    <ClInclude Include="include\ui\sceneselector.h" />
     <ClInclude Include="include\velocitysource.h" />
   </ItemGroup>
   <ItemGroup>
