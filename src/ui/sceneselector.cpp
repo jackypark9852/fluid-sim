@@ -7,15 +7,33 @@
 #include  <iostream>		
 
 
-SceneSelector::SceneSelector()
+SceneSelector::SceneSelector() :
+	selectedSceneID(0), scenesStorage(), sceneNames()
 {}
 
 void SceneSelector::ShowUI()
 {
-	std::cout << "Showing UI" << std::endl; 
-	ImGui::Combo("MyCombo", &selectedSceneID, sceneNames.data(), sceneNames.size()); 
+    ImGui::Combo("Scenes", &selectedSceneID, sceneNames.data(), sceneNames.size());
 }
 
-void SceneSelector::addScene(const Scene& scene) {
-	sceneNames.push_back(scene.GetName()); 
+void SceneSelector::AddScenes(const std::vector<std::string>& newSceneNames)
+{
+    // Append new scenes to the storage
+    for (const std::string& sceneName : newSceneNames) {
+        scenesStorage.push_back(sceneName);
+    }
+
+    // Rebuild the sceneNames vector because the pointers stored in sceneNames
+    // are invalidated when scenesStorage is modified. This happens due to potential
+    // reallocation of memory in scenesStorage (std::vector). Rebuilding ensures that
+    // sceneNames contains valid pointers to the updated string data in scenesStorage.
+    sceneNames.clear();
+    for (const std::string& scene : scenesStorage) {
+        sceneNames.push_back(scene.c_str());
+    }
+}
+
+const std::string& SceneSelector::GetSelectedSceneName() const
+{
+	return scenesStorage[selectedSceneID];
 }

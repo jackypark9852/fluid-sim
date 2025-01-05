@@ -9,19 +9,18 @@ MyGL::MyGL(unsigned int windowWidth, unsigned int windowHeight):
     window(nullptr), imguiContext(nullptr), vao(0), 
     overlayShader(), quad(), testTextureHandle(-1),
     fluidSimulator(100, testTextureHandle),
-    camera(windowWidth, windowHeight), sceneSelector(), scenes()
+    camera(windowWidth, windowHeight), sceneSelector()
 {
-    // fluidSimulator = FluidSimulator(100, testTextureHandle);
-    InitializeScenes(); 
+    sceneSelector.AddScenes(fluidSimulator.GetSceneNames()); 
 }
 
 MyGL::MyGL(const MyGL& other):
 	windowWidth(other.windowWidth), windowHeight(other.windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0),
     overlayShader(), quad(), testTextureHandle(-1),
-    camera(windowWidth, windowHeight), sceneSelector(), scenes() 
+    camera(windowWidth, windowHeight), sceneSelector()
 {
-    InitializeScenes(); 
+    sceneSelector.AddScenes(other.fluidSimulator.GetSceneNames());
 }
 
 MyGL::~MyGL() {
@@ -111,7 +110,12 @@ void MyGL::PaintGL() {
 
     // Poll for and process events
     glfwPollEvents();
+
+    // Display debug ui
     ShowImGuiWindow();
+
+    // Check which scene is selected by the user and set it as active scene in the fluid simulator
+    fluidSimulator.ActivateSceneByName(sceneSelector.GetSelectedSceneName()); 
 
     // Handle mouse events for camera functions
     // TODO: move this somewhere more appropriate, but we don't have a Tick() yet().
@@ -147,9 +151,9 @@ void MyGL::ShowImGuiWindow()
     ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_FirstUseEver);
 
     // Main body of the Demo window starts here.
-    if (!ImGui::Begin("Dear ImGui Demo"))
+    if (!ImGui::Begin("Fluid Simulator"))
     {
-        // Early out if the window is collapsed, as an optimization.
+        //// Early out if the window is collapsed, as an optimization.
         ImGui::End();
         return;
     }
@@ -252,18 +256,6 @@ void MyGL::RenderTestImage()
     glDisable(GL_DEPTH_TEST);
     overlayShader.Draw(quad);
     glEnable(GL_DEPTH_TEST);
-}
-
-void MyGL::InitializeScenes()
-{
-    // Create two empty scenes and add them to the scene selector to test scene selection functionarlity
-    const char* emptySceneName1 = "Empty Scene 1"; 
-    scenes[emptySceneName1] = Scene(emptySceneName1);
-    sceneSelector.addScene(scenes[emptySceneName1]);
-
-    const char* emptySceneName2 = "Empty Scene 2";
-    scenes[emptySceneName2] = Scene(emptySceneName2);
-    sceneSelector.addScene(scenes[emptySceneName2]);
 }
 
 void MyGL::updateCamera() {

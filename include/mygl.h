@@ -9,9 +9,7 @@
 #include "quad.h"
 #include "camera.h"
 #include "ui/sceneselector.h"
-#include "scenes/scene.h"
 #include <fluidsimulator.h>
-#include <map>
 
 class MyGL
 {
@@ -33,9 +31,9 @@ private:
 
 	Quad quad; /// <summary> A quad that covers the full screen (e.g. background) </summary>
 	GLuint testTextureHandle; /// <summary> The handle for the test texture created in RenderTestTexture() </summary>
-	SceneSelector sceneSelector; /// <summary> An ImGui UI element for selecting the currently active scene in the simulationJKO </summary>
-	std::map<const char*, Scene> scenes; /// <summary> A map that matches the scene's name to the scenes avalible in the simulation </summary>
 	FluidSimulator fluidSimulator;
+	SceneSelector sceneSelector; /// <summary> An ImGui UI element for selecting the currently active scene in the simulationJKO </summary>
+	
 public: 
 	// Rule of Three
 	MyGL(unsigned int windowWidth = 1200, unsigned int windowHeight = 1200);
@@ -93,12 +91,5 @@ public:
 	/// Uses the overlay shader program to render a test image to the full screen quad 
 	/// </summary>
 	void RenderTestImage(); 
-
-	/// <summary>
-	/// Initializes the set of availible scenes for the fluid simulator. 
-	/// At any time, one of these scenes will be selected using tehe SceneSelector UI component, 
-	/// and the selection will be passed onto the FluidSimulator.
-	/// </summary>
-	void InitializeScenes(); 
 };
 

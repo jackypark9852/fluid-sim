@@ -1,13 +1,16 @@
 #include <imgui.h>
 #include <glm/glm.hpp>
 #include <iostream>
-
 #include "fluidsimulator.h"
 #include "circularSource.h"
 #include "rectvelocitysource.h"
+#include "scenes/crosswindsscene.h"
+#include "scenes/whirlwindscene.h"
+#include "scenes/waterfountainscene.h"
 
 FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle) :
-	N(N), diffusion(0.0001), viscosity(0), densityTextureHandle(densityTextureHandle), elemCount(N*N), densSources()
+	N(N), diffusion(0.0001), viscosity(0), densityTextureHandle(densityTextureHandle), elemCount(N*N), densSources(),
+	scenes(), activeScene(nullptr)
 {
 	int gridSize = (N + 2) * (N + 2);
 	u.resize(gridSize);
@@ -31,19 +34,7 @@ FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle) :
 		}
 	}
 
-	// Add two circular density sources at opposite sides of the grid
-	// Source 1: Positioned near the left edge
-	densSources.push_back(CircularSource(N, N / 4, N / 2, 5, 100));
-
-	// Source 2: Positioned near the right edge
-	densSources.push_back(CircularSource(N, 3 * N / 4, N / 2, 5, 100));
-
-	// Add two rectangular velocity sources to direct the smoke
-	// Velocity Source 1: Pushes smoke from the left source to the right
-	velSources.push_back(RectVelocitySource(N, 20, 20, N / 4 - 10, N / 2 - 10, 0.1, 0));
-
-	// Velocity Source 2: Pushes smoke from the right source to the left
-	velSources.push_back(RectVelocitySource(N, 20, 20, 3 * N / 4 - 10, N / 2 - 10, -0.1, 0));
+	InitializeScenes(); 
 }
 
 const std::vector<double>& FluidSimulator::GetU() const
@@ -99,8 +90,7 @@ void FluidSimulator::Tick()
 		densSum += dens[i];
 	}
 	densSum += 1;
-	std::cout << densSum << std::endl;
-	
+	//std::cout << densSum << std::endl;
 
 	/*for (int i = 0; i <= N; ++i) {
 		AddDens(10, i, 100);
@@ -281,6 +271,78 @@ void FluidSimulator::UpdateDensityTexture() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void FluidSimulator::InitializeScenes()
+{
+	// Create two empty scenes and add them to the scene selector to test scene selection functionarlity
+	std::string emptySceneName1("Empty Scene");
+	scenes[emptySceneName1] = Scene(N, emptySceneName1);
+
+	std::string crosswindSceneName("Crosswind Scene");
+	scenes[crosswindSceneName] = CrosswindsScene(N, crosswindSceneName);
+
+	std::string whirlwindSceneName("Whirlwind Scene"); 
+	scenes[whirlwindSceneName] = WhirlwindScene(N, whirlwindSceneName);
+
+	std::string waterFountainScene("Water Fountain Scene");
+	scenes[waterFountainScene] = WaterFountainScene(N, waterFountainScene);
+}
+
 void FluidSimulator::SetDensityTextureHandle(GLuint handle) {
 	densityTextureHandle = handle;
+}
+
+std::vector<std::string> FluidSimulator::GetSceneNames() const
+{
+	// Create a vector and populate it with scene names by iterating through the map 
+	std::vector<std::string> sceneNames; 
+	for (auto kvp : scenes) { // kvp: (const char* name, Scene scene) 
+		sceneNames.push_back(kvp.first); 
+	}
+	return sceneNames; 
+}
+
+void FluidSimulator::ActivateSceneByName(const std::string& sceneName)
+{
+	// Do nothing if it is already active
+	if (activeScene != nullptr && activeScene->GetName() == sceneName) {
+		return; 
+	}
+
+	// Do nothing if not matching scene exists
+	if (scenes.find(sceneName) == scenes.end()) {
+		return; 
+	}
+	else {
+		// Activate the newly selected scene
+		activeScene = &(scenes[sceneName]); 
+
+		// Remove density sources from the previous scene
+		densSources.clear(); 
+		velSources.clear(); 
+
+		// Reset the density and the velocity of the current scene
+		Reset(); 
+
+		// Add the density and velocity sources from the new scene
+		for (const DensitySource& densSource : activeScene->GetDensSources()) {
+			densSources.push_back(densSource); 
+		}
+
+		for (const VelocitySource& velSource : activeScene->GetVelocitySources()) {
+			velSources.push_back(velSource); 
+		}
+
+		std::cout << sceneName << " activated!" << std::endl; 
+	}	
+}
+
+void FluidSimulator::Reset()
+{
+	int gridSize = (N + 2) * (N + 2);
+	u.assign(gridSize, 0.0);
+	v.assign(gridSize, 0.0);
+	u_prev.assign(gridSize, 0.0);
+	v_prev.assign(gridSize, 0.0);
+	dens.assign(gridSize, 0.0);
+	dens_prev.assign(gridSize, 0.0);
 }
