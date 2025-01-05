@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\arrow.cpp" />
     <ClCompile Include="src\densitysource.cpp" />
     <ClCompile Include="src\rectvelocitysource.cpp" />
     <ClCompile Include="src\scenes\waterfountainscene.cpp" />
@@ -46,6 +47,7 @@
     <ClCompile Include="thirdParty\imgui-master\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\arrow.h" />
     <ClInclude Include="include\circularsource.h" />
     <ClInclude Include="include\densitysource.h" />
     <ClInclude Include="include\camera.h" />
@@ -65,6 +67,8 @@
     <ClInclude Include="include\velocitysource.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="glsl\velField.frag.glsl" />
+    <None Include="glsl\velField.vert.glsl" />
     <None Include="glsl\overlay.frag.glsl" />
     <None Include="glsl\overlay.vert.glsl" />
   </ItemGroup>

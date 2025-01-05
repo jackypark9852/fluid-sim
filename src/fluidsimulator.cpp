@@ -8,9 +8,9 @@
 #include "scenes/whirlwindscene.h"
 #include "scenes/waterfountainscene.h"
 
-FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle) :
+FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle, GLuint velocityTextureHandle) :
 	N(N), diffusion(0.0001), viscosity(0), densityTextureHandle(densityTextureHandle), elemCount(N*N), densSources(),
-	scenes(), activeScene(nullptr)
+	velocityTextureHandle(velocityTextureHandle), scenes(), activeScene(nullptr)
 {
 	int gridSize = (N + 2) * (N + 2);
 	u.resize(gridSize);
@@ -30,7 +30,7 @@ FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle) :
 
 			}
 
-			// u[IX(x, y)] = 1;
+			//u[IX(x, y)] = 1;
 		}
 	}
 
@@ -64,6 +64,9 @@ void FluidSimulator::Tick()
 	VelStep(N, u, v, u_prev, v_prev, viscosity, dt);
 	DensStep(N, dens, dens_prev, u, v, diffusion, dt);
 	UpdateDensityTexture();
+	if (velocityTextureHandle <= 10) {
+		UpdateVelocityTexture();
+	}
 
 	if (ImGui::IsMouseDragging(0) && !ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
 		ImVec2 dragVec = ImGui::GetMouseDragDelta(0);
@@ -72,10 +75,12 @@ void FluidSimulator::Tick()
 			AddDens(cursorX, cursorY, abs((dragVec.x + dragVec.y) * 100));
 		}
 	}
-	else if (ImGui::IsMouseDragging(1) && !ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
+	if (ImGui::IsMouseDragging(1) && !ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
 		ImVec2 dragVec = ImGui::GetMouseDragDelta(1);
 		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N) {
-			AddVel(cursorX, cursorY, dragVec.x * 0.001, dragVec.y * 0.001);
+			float dragStartX = cursorX - (dragVec.x / 1200 * N);
+			float dragStartY = cursorY - ((1 - dragVec.y) / 1200) * N;
+			AddVel(dragStartX, dragStartY, dragVec.x * 0.001, dragVec.y * -0.001);
 		}
 	}
 
@@ -90,7 +95,8 @@ void FluidSimulator::Tick()
 		densSum += dens[i];
 	}
 	densSum += 1;
-	//std::cout << densSum << std::endl;
+	// std::cout << densSum << std::endl;
+	
 
 	/*for (int i = 0; i <= N; ++i) {
 		AddDens(10, i, 100);
@@ -100,6 +106,11 @@ void FluidSimulator::Tick()
 GLuint FluidSimulator::GetDensityTextureHandle() const
 {
 	return densityTextureHandle;
+}
+
+GLuint FluidSimulator::GetVelocityTextureHandle() const
+{
+	return velocityTextureHandle;
 }
 
 void FluidSimulator::AddSource(int N, std::vector<double>& x, const std::vector<double>& s, double dT)
@@ -257,10 +268,6 @@ void FluidSimulator::UpdateDensityTexture() {
 			gradient[index] = pixelDensity;
 			gradient[index + 1] = pixelDensity;
 			gradient[index + 2] = pixelDensity;
-			// Change color of the fluid to yellow if density is higher than a threshold
-			//if (pixelDensity > 1.1) {
-			//	gradient[index + 2] = 0;
-			//}
 			gradient[index + 3] = 1;
 		}
 	}
@@ -289,6 +296,32 @@ void FluidSimulator::InitializeScenes()
 
 void FluidSimulator::SetDensityTextureHandle(GLuint handle) {
 	densityTextureHandle = handle;
+}
+
+void FluidSimulator::UpdateVelocityTexture() {
+	std::vector<float> field(N * N * 4); // RGBA as doubles
+
+	for (int y = 1; y <= N; ++y) {
+		for (int x = 1; x <= N; ++x) {
+			glm::vec3 pixelVelocity = glm::vec3(u[IX(x, y)], v[IX(x, y)], 0);
+			int index = ((y - 1) * N + (x - 1)) * 4;
+			// mapping the vector vals [-1, 1] to [0, 1]
+			field[index] = (glm::normalize(pixelVelocity).x + 1.f) * 0.5;
+			field[index + 1] = (glm::normalize(pixelVelocity).y + 1.f) * 0.5;
+			field[index + 2] = (glm::normalize(pixelVelocity).z + 1.f) * 0.5;
+			// storing original length, dividing by 10 to ensure it is between 0 and 1, might need to change later
+			field[index + 3] = glm::length(pixelVelocity) / 10.f;
+		}
+	}
+
+	//todo:: send to gpu. better ways to do this
+	glBindTexture(GL_TEXTURE_2D, velocityTextureHandle);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, N, N, 0, GL_RGBA, GL_FLOAT, field.data());
+	glBindTexture(GL_TEXTURE_2D, 1);
+}
+
+void FluidSimulator::SetVelocityTextureHandle(GLuint handle) {
+	velocityTextureHandle = handle;
 }
 
 std::vector<std::string> FluidSimulator::GetSceneNames() const

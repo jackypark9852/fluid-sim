@@ -89,6 +89,13 @@ public:
     void Draw(const Drawable& drawable);
 
     /// <summary>
+    /// Draws the specified drawable object using this shader program and instanced drawing.
+    /// </summary>
+    /// <param name="drawable">The drawable object to render.</param>
+    /// <param name="instances">The number of instances to draw.</param>
+    void DrawInstanced(const Drawable& drawable, int instances);
+
+    /// <summary>
     /// Utility function that reads the content of a text file.
     /// </summary>
     /// <param name="file">The path to the text file.</param>
