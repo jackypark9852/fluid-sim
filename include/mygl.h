@@ -11,6 +11,7 @@
 #include "camera.h"
 #include "ui/sceneselector.h"
 #include <fluidsimulator.h>
+#include <fluidsimulator3d.h>
 
 class MyGL
 {
@@ -33,10 +34,11 @@ private:
 
 	Quad quad; /// <summary> A quad that covers the full screen (e.g. background) </summary>
 	Arrow arrow; /// <summary> An arrow used for the velocity field display </summary>
-	GLuint testTextureHandle; /// <summary> The handle for the test texture created in RenderTestTexture() </summary>
-	GLuint velocityTextureHandle; /// <summary> The handle for the velocity field texture created in RenderVelocityField() </summary>
+	GLuint densityTextureHandle2d; /// <summary> The handle for the test texture created in RenderTestTexture() </summary>
+	GLuint velocityTextureHandle2d; /// <summary> The handle for the velocity field texture created in RenderVelocityField() </summary>
 	FluidSimulator fluidSimulator;
-	
+	FluidSimulator3d fluidSimulator3d;
+
 	SceneSelector sceneSelector; /// <summary> An ImGui UI element for selecting the currently active scene in the simulationJKO </summary>
 	
 public: 

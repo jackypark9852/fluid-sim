@@ -1,4 +1,4 @@
-#include "rectvelocitysource.h"
+#include "sources\rectvelocitysource.h"
 
 RectVelocitySource::RectVelocitySource(unsigned int N, int width, int height, int x, int y, double uVel, double vVel)
     :

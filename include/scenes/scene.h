@@ -1,9 +1,14 @@
 #pragma once
 
-#include "densitysource.h"
-#include "velocitysource.h"
-
+#include "sources/densitysource.h"
+#include "sources/velocitysource.h"
 #include <string>
+
+enum class SceneType {
+	NONE = 0,
+	TWOD,
+	THREED
+};
 
 /// <summary>
 /// A class representing a scene in the simulation. 
@@ -14,6 +19,8 @@ class Scene {
 protected:
 	// The width of the inner grid (non-boundary cells) excluding the boundary.
 	// The total grid dimensions are (N+2) x (N+2) to account for boundaries.
+	SceneType sceneType;
+	
 	unsigned int N;
 
 	// The name of the scene
@@ -30,7 +37,7 @@ public:
 	/// Constructs a scene object
 	/// </summary>
 	/// <param name="name"> The name of the scene </param>
-	Scene(unsigned int N = 1000, const std::string& name = "Empty Scene");
+	Scene(unsigned int N = 1000, const std::string& name = "Empty Scene", SceneType type = SceneType::TWOD);
 
 	/// <summary>
 	/// Returns the name of the string.

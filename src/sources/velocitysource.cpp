@@ -1,4 +1,4 @@
-#include "velocitySource.h"
+#include "sources\velocitySource.h"
 
 VelocitySource::VelocitySource(unsigned int N, double uVel, double vVel):
     N(N), u((N + 2)* (N + 2), 0.0), v((N + 2)* (N + 2), 0.0), 

@@ -6,6 +6,13 @@
 // to a 1D index in a flattened array. The grid includes a boundary, 
 // so its actual dimensions are (N+2) x (N+2).
 #define IX(i, j) ((i) + (N + 2) * (j))
+#define IX3D(i, j, k) ((i) + (N + 2) * (j) + (N + 2) * (N + 2) * k)
+
+enum class SourceType {
+    NONE = 0,
+    TWOD,
+    THREED
+};
 
 /// <summary>
 /// Represents a source of density that can dynamically update over time.
@@ -29,7 +36,7 @@ public:
     /// Initializaes the source vector to the correct size.
     /// </summary>
     /// <param name="N"></param>
-    DensitySource(unsigned int N);
+    DensitySource(unsigned int N, SourceType type);
 
     /// <summary>
     /// Updates the source array dynamically each physics frame.

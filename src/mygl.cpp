@@ -7,8 +7,9 @@
 MyGL::MyGL(unsigned int windowWidth, unsigned int windowHeight): 
 	windowWidth(windowWidth), windowHeight(windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0), 
-    overlayShader(), quad(), testTextureHandle(-1), velocityTextureHandle(-1),
-    fluidSimulator(100, testTextureHandle, velocityTextureHandle),
+    overlayShader(), quad(), densityTextureHandle2d(-1), velocityTextureHandle2d(-1),
+    fluidSimulator(100, densityTextureHandle2d, velocityTextureHandle2d),
+    fluidSimulator3d(20, densityTextureHandle2d, velocityTextureHandle2d),
     camera(windowWidth, windowHeight), sceneSelector(),
     velFieldShader(), arrow()
 {
@@ -18,7 +19,7 @@ MyGL::MyGL(unsigned int windowWidth, unsigned int windowHeight):
 MyGL::MyGL(const MyGL& other):
 	windowWidth(other.windowWidth), windowHeight(other.windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0),
-    overlayShader(), quad(), testTextureHandle(-1), velocityTextureHandle(-1),
+    overlayShader(), quad(), densityTextureHandle2d(-1), velocityTextureHandle2d(-1),
     camera(windowWidth, windowHeight), sceneSelector(),
     velFieldShader(), arrow()
 {
@@ -210,7 +211,7 @@ bool MyGL::InitializeShaders() {
 
 void MyGL::RenderTestImage()
 {
-    if (testTextureHandle == -1) {
+    if (densityTextureHandle2d == -1) {
         const int textureWidth = 512;
         const int textureHeight = 512;
 
@@ -228,8 +229,8 @@ void MyGL::RenderTestImage()
 
 
         // Generate and bind a texture
-        glGenTextures(1, &testTextureHandle);
-        glBindTexture(GL_TEXTURE_2D, testTextureHandle);
+        glGenTextures(1, &densityTextureHandle2d);
+        glBindTexture(GL_TEXTURE_2D, densityTextureHandle2d);
 
         // Set texture parameters
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -244,7 +245,7 @@ void MyGL::RenderTestImage()
         glBindTexture(GL_TEXTURE_2D, 0);
 
         //Set fluid sim handle
-        fluidSimulator.SetDensityTextureHandle(testTextureHandle);
+        fluidSimulator.SetDensityTextureHandle(densityTextureHandle2d);
     }
 
     // Render the textured quad
@@ -252,7 +253,7 @@ void MyGL::RenderTestImage()
 
     // Bind the texture for rendering
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, testTextureHandle);
+    glBindTexture(GL_TEXTURE_2D, densityTextureHandle2d);
     overlayShader.SetUnifInt("u_Texture", 0);
 
     // Temporarily disable depth testing to ensure the full-screen quad is rendered 
@@ -270,13 +271,13 @@ void MyGL::RenderTestImage()
     }
 }
 void MyGL::TestVelField() {
-    if (velocityTextureHandle == -1) {
+    if (velocityTextureHandle2d == -1) {
         const int textureWidth = 512;
         const int textureHeight = 512;
 
         // Generate and bind a texture
-        glGenTextures(1, &velocityTextureHandle);
-        glBindTexture(GL_TEXTURE_2D, velocityTextureHandle);
+        glGenTextures(1, &velocityTextureHandle2d);
+        glBindTexture(GL_TEXTURE_2D, velocityTextureHandle2d);
 
         // Set texture parameters
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -285,7 +286,7 @@ void MyGL::TestVelField() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         //Set fluid sim handle
-        fluidSimulator.SetVelocityTextureHandle(velocityTextureHandle);
+        fluidSimulator.SetVelocityTextureHandle(velocityTextureHandle2d);
     }
 
     // render velocity field
@@ -293,7 +294,7 @@ void MyGL::TestVelField() {
 
     // Bind the texture for rendering
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, velocityTextureHandle);
+    glBindTexture(GL_TEXTURE_2D, velocityTextureHandle2d);
     overlayShader.SetUnifInt("u_Texture", 1);
     glDisable(GL_DEPTH_TEST);
     // TODO: Set this 100 * 100 to a var that's connected to the fluidism
@@ -303,13 +304,13 @@ void MyGL::TestVelField() {
 
 void MyGL::RenderVelocityField() {
     // create and bind texture
-    if (velocityTextureHandle == -1) {
+    if (velocityTextureHandle2d == -1) {
         const int textureWidth = 512;
         const int textureHeight = 512;
 
         // Generate and bind a texture
-        glGenTextures(1, &velocityTextureHandle);
-        glBindTexture(GL_TEXTURE_2D, velocityTextureHandle);
+        glGenTextures(1, &velocityTextureHandle2d);
+        glBindTexture(GL_TEXTURE_2D, velocityTextureHandle2d);
 
         // Set texture parameters
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -318,7 +319,7 @@ void MyGL::RenderVelocityField() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         //Set fluid sim handle
-        fluidSimulator.SetVelocityTextureHandle(velocityTextureHandle);
+        fluidSimulator.SetVelocityTextureHandle(velocityTextureHandle2d);
     }
 
     // render velocity field
@@ -326,7 +327,7 @@ void MyGL::RenderVelocityField() {
 
     // Bind the texture for rendering
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, velocityTextureHandle);
+    glBindTexture(GL_TEXTURE_2D, velocityTextureHandle2d);
     velFieldShader.SetUnifInt("u_Texture", 1);
     glDisable(GL_DEPTH_TEST);
     // TODO: Set this 100 * 100 to a var that's connected to the fluidism

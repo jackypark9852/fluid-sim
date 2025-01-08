@@ -1,7 +1,7 @@
 #include "scenes/scene.h"
 
-Scene::Scene(unsigned int N, const std::string& name):
-	N(N), name(name)
+Scene::Scene(unsigned int N, const std::string& name, SceneType type):
+	N(N), name(name), sceneType(type)
 {}
 
 const std::string& Scene::GetName() const

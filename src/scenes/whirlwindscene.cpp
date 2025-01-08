@@ -1,9 +1,9 @@
 #include "scenes/whirlwindscene.h"
-#include "circularsource.h"
-#include "rectvelocitysource.h"
+#include "sources/circularsource.h"
+#include "sources/rectvelocitysource.h"
 
 WhirlwindScene::WhirlwindScene(unsigned int N, const std::string& name) :
-	Scene(N, name)
+	Scene(N, name, SceneType::TWOD)
 {
 	// Add two circular density sources that will simulate a swirling vortex
 	// Source 1: Positioned near the center of the grid

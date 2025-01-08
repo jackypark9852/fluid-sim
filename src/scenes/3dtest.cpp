@@ -1,9 +1,9 @@
-#include "scenes/crosswindsscene.h"
+#include "scenes/3dtest.h"
 #include "sources/circularsource.h"
 #include "sources/rectvelocitysource.h"
 
-CrosswindsScene::CrosswindsScene(unsigned int N, const std::string& name):
-	Scene(N, name, SceneType::TWOD)
+ThreeDTest::ThreeDTest(unsigned int N, const std::string& name) :
+	Scene(N, name, SceneType::THREED)
 {
 	// Add two circular density sources at opposite sides of the grid
 	// Source 1: Positioned near the left edge

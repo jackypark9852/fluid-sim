@@ -2,8 +2,8 @@
 
 // Macro for accessing a 1D array with 2D-like syntax. This maps 2D indices (i, j) 
 // to a 1D index in a flattened array. The grid includes a boundary, 
-// so its actual dimensions are (N+2) x (N+2).
-#define IX(i, j) ((i) + (N + 2) * (j))
+// so its actual dimensions are (N+2) x (N+2) x (N + 2).
+#define IX3D(i, j, k) ((i) + (N + 2) * (j) + (N + 2) * (N + 2) * k)
 
 #include <vector>
 #include <glad/glad.h>
@@ -13,27 +13,17 @@
 #include "scenes/scene.h" 
 #include <map>
 #include <string>
+#include <fluidsimulator.h>
 
-enum class BoundaryType {
-    NONE = 0,    // For scalar fields like density (no special reflection)
-    HORIZONTAL,  // For horizontal velocity (u)
-    VERTICAL,   // For vertical velocity (v)
-    FORWARD //for forward velocity (w)
-};
-
-static void SWAP(std::vector<double>& x0, std::vector<double>& x) {
-    x0.swap(x);
-}
-
-class FluidSimulator {
-private:    
+class FluidSimulator3d {
+private:
     unsigned int N;          // The width of the inner grid (non-boundary cells) excluding the boundary.
-                             // The total grid dimensions are (N+2) x (N+2) to account for boundaries.
+    // The total grid dimensions are (N+2) x (N+2) to account for boundaries.
 
     unsigned int elemCount;  // Total number of elements in the grid, including boundaries.
-                             // This equals (N+2) * (N+2).
+    // This equals (N+2) * (N+2).
 
-    // Texture representing normalized density field as a greyscale image
+// Texture representing normalized density field as a greyscale image
     GLuint densityTextureHandle;
 
     // Texture representing the velocity field as an rgb image corresponding to xyz vals
@@ -51,6 +41,12 @@ private:
     // Vertical velocity components of the fluid at the previous time step
     std::vector<double> v_prev;
 
+    //Forward velocity components of the fluid at the current time step
+    std::vector<double> w;
+
+    //Forward velocity components of the fluid at the previous time step
+    std::vector<double> w_prev;
+
     // Density values of the fluid at the current time step
     std::vector<double> dens;
 
@@ -58,16 +54,16 @@ private:
     std::vector<double> dens_prev;
 
     // Density sources present in the current simulation 
-    std::vector<DensitySource> densSources; 
-    
+    std::vector<DensitySource> densSources;
+
     // Velocity sources present in the current simulation
-    std::vector<VelocitySource> velSources; 
+    std::vector<VelocitySource> velSources;
 
     /// A map that matches the scene's name to the scenes avalible in the simulation </summary>
     std::map<std::string, Scene> scenes;
 
     /// The scene that is currently active. 
-    Scene* activeScene; 
+    Scene* activeScene;
 
     double viscosity;
 
@@ -93,8 +89,8 @@ private:
     /// the contributions from each source.
     /// </summary>
     /// <param name="dT">The time step used to scale the contributions from each source.</param>
-    void ApplyVelocitySources(double dT); 
-    
+    void ApplyVelocitySources(double dT);
+
     /// <summary>
     /// Adds amt density to the xy grid cell.
     /// </summary>
@@ -134,7 +130,7 @@ private:
     /// <param name="v">The vertical velocity field.</param>
     /// <param name="dt">The time step over which advection occurs.</param>
     void Advect(int N, BoundaryType b, std::vector<double>& d, const std::vector<double>& d0, const std::vector<double>& u,
-        const std::vector<double>& v, double dt);
+        const std::vector<double>& v, const std::vector<double>& w, double dt);
 
     /// <summary>
     /// Performs a full simulation step for the density field, including diffusion and advection.
@@ -144,10 +140,10 @@ private:
     /// <param name="x0">The density field from the previous time step.</param>
     /// <param name="u">The horizontal velocity field.</param>
     /// <param name="v">The vertical velocity field.</param>
+    /// <param name="w">The forward velocity field.</param>
     /// <param name="diff">The diffusion coefficient controlling the rate of diffusion.</param>
     /// <param name="dt">The time step for the simulation step.</param>
-    void DensStep(int N, std::vector<double>& x, std::vector<double>& x0, const std::vector<double>& u,
-        const std::vector<double>& v, double diff, double dt);
+    void DensStep(int N, std::vector<double>& x, std::vector<double>& x0, const std::vector<double>& u, const std::vector<double>& v, const std::vector<double>& w, double diff, double dt);
 
     /// <summary>
     /// Performs a full simulation step for velocity field
@@ -159,7 +155,7 @@ private:
     /// <param name="v0">The vertical velocity field from the previous time step.</param>
     /// <param name="visc">The viscosity coefficient controlling the rate of diffusion.</param>
     /// <param name="dt">The time step for the simulation step.</param>
-    void VelStep(int N, std::vector<double>& u, std::vector<double>& v, std::vector<double>& u0, std::vector<double>& v0,
+    void VelStep(int N, std::vector<double>& u, std::vector<double>& v, std::vector<double>& w, std::vector<double>& u0, std::vector<double>& v0, std::vector<double>& w0,
         double visc, double dt);
 
     /// <summary>
@@ -171,7 +167,7 @@ private:
     /// <param name="p"></param>
     /// <param name="div"></param>
     /// todo: documentation here 
-    void Project(int N, std::vector<double>& u, std::vector<double>& v, std::vector<double>& p, std::vector<double>& div);
+    void Project(int N, std::vector<double>& u, std::vector<double>& v, std::vector<double>& w, std::vector<double>& p, std::vector<double>& div);
 
     /// <summary>
     /// Applies boundary conditions to a scalar field on the simulation grid.
@@ -197,15 +193,13 @@ private:
     /// and the selection will be passed onto the FluidSimulator.
     /// </summary>
     void InitializeScenes();
-
-
-public: 
+public:
     /// <summary>
     /// Constructs a FluidSimulator object with a grid size of (N+2) x (N+2), 
     /// including boundary cells.
     /// </summary>
     /// <param name="N">The width (and height) of the inner grid, excluding boundary cells. Defaults to 100.</param>
-    FluidSimulator(unsigned int N = 100, GLuint densityTextureHandle = -1, GLuint velocityTextureHandle = -1);
+    FluidSimulator3d(unsigned int N = 100, GLuint densityTextureHandle = -1, GLuint velocityTextureHandle = -1);
 
     /// <summary>
     /// Gets the current horizontal velocity components of the fluid.
@@ -258,14 +252,14 @@ public:
     /// Retrieves a vector containing string literals of the scenes in the simulation. 
     /// </summary>
     /// <returns> A vector of scene name strings. </returns>
-    std::vector<std::string> GetSceneNames() const; 
-    
+    std::vector<std::string> GetSceneNames() const;
+
     /// <summary>
     /// Activates the scene with the matching name. 
     /// Does nothing if no scene matching the name "sceneName" exists. 
     /// </summary>
     /// <param name="sceneName"> The string literal containing the name of the scene to be activated. </param>
-    void ActivateSceneByName(const std::string& sceneName); 
+    void ActivateSceneByName(const std::string& sceneName);
 
     /// <summary>
     /// Clears the current velocity and density fields by resetting the vectors to their initial state.
@@ -273,4 +267,3 @@ public:
     /// </summary>
     void Reset();
 };
-            

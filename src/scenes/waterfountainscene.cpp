@@ -1,9 +1,9 @@
 #include "scenes/waterfountainscene.h"
-#include "circularsource.h"
-#include "rectvelocitysource.h"
+#include "sources/circularsource.h"
+#include "sources/rectvelocitysource.h"
 
 WaterFountainScene::WaterFountainScene(unsigned int N, const std::string& name) :
-    Scene(N, name)
+    Scene(N, name, SceneType::TWOD)
 {
     // Add a single density source to simulate the water particles
     // Positioned at the center of the bottom of the grid, with radius and intensity proportional to N

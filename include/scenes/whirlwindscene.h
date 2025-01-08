@@ -1,8 +1,8 @@
 #pragma once
 
 #include "scenes/scene.h"
-#include "circularsource.h"
-#include "rectvelocitysource.h"
+#include "sources/circularsource.h"
+#include "sources/rectvelocitysource.h"
 
 class WhirlwindScene : public Scene {
 public: 

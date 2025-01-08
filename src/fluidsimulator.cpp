@@ -2,8 +2,8 @@
 #include <glm/glm.hpp>
 #include <iostream>
 #include "fluidsimulator.h"
-#include "circularSource.h"
-#include "rectvelocitysource.h"
+#include "sources/circularSource.h"
+#include "sources/rectvelocitysource.h"
 #include "scenes/crosswindsscene.h"
 #include "scenes/whirlwindscene.h"
 #include "scenes/waterfountainscene.h"
@@ -19,20 +19,6 @@ FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle, GLui
 	v_prev.resize(gridSize);
 	dens.resize(gridSize);
 	dens_prev.resize(gridSize);
-
-	for (int x = 1; x <= N; ++x) {
-		for (int y = 1; y <= N; ++y) {
-			if (x >= N - 20) {
-				//dens_prev[IX(x, y)] = 4;
-			}
-			else {
-				//dens_prev[IX(x, y)] = 1;
-
-			}
-
-			//u[IX(x, y)] = 1;
-		}
-	}
 
 	InitializeScenes(); 
 }
@@ -83,24 +69,6 @@ void FluidSimulator::Tick()
 			AddVel(dragStartX, dragStartY, dragVec.x * 0.001, dragVec.y * -0.001);
 		}
 	}
-
-	for (int x = 1; x <= N; ++x) {
-		for (int y = 1; y <= N; y++) {
-			//dens[IX(x, y)] *= 0.99;
-		}
-	}
-
-	double densSum = 0;
-	for (int i = 0; i < dens.size(); ++i) {
-		densSum += dens[i];
-	}
-	densSum += 1;
-	// std::cout << densSum << std::endl;
-	
-
-	/*for (int i = 0; i <= N; ++i) {
-		AddDens(10, i, 100);
-	}*/
 }
 
 GLuint FluidSimulator::GetDensityTextureHandle() const
@@ -160,7 +128,6 @@ void FluidSimulator::Diffuse(int N, BoundaryType b, std::vector<double>& x, cons
 		}
 		SetBoundaryConditions(N, b, x);
 	}
-
 }
 
 void FluidSimulator::Advect(int N, BoundaryType b, std::vector<double>& d, const std::vector<double>& d0, const std::vector<double>& u, const std::vector<double>& v, double dt)
@@ -174,7 +141,8 @@ void FluidSimulator::Advect(int N, BoundaryType b, std::vector<double>& d, const
 			if (x < 0.5) x = 0.5; if (x > N + 0.5) x = N + 0.5; i0 = (int)x; i1 = i0 + 1;
 			if (y < 0.5) y = 0.5; if (y > N + 0.5) y = N + 0.5; j0 = (int)y; j1 = j0 + 1;
 			s1 = x - i0; s0 = 1 - s1; t1 = y - j0; t0 = 1 - t1;
-			d[IX(i, j)] = s0 * (t0 * d0[IX(i0, j0)] + t1 * d0[IX(i0, j1)]) +
+			d[IX(i, j)] =
+				s0 * (t0 * d0[IX(i0, j0)] + t1 * d0[IX(i0, j1)]) +
 				s1 * (t0 * d0[IX(i1, j0)] + t1 * d0[IX(i1, j1)]);
 		}
 	}

@@ -1,7 +1,7 @@
-#include "circularSource.h"
+#include "sources\circularsource.h"
 
 CircularSource::CircularSource(unsigned int N, int x, int y, double radius, double amount):
-	DensitySource(N), circleCenter(x, y), radius(radius), amount(amount),
+	DensitySource(N, SourceType::TWOD), circleCenter(x, y), radius(radius), amount(amount),
 	area(glm::pi<double>() * radius * radius)
 {	
 	// Lamda function for checking if the cell is within the radius from the circle center 
