@@ -26,6 +26,7 @@
     <ClCompile Include="src\scenes\waterfountainscene.cpp" />
     <ClCompile Include="src\scenes\whirlwindscene.cpp" />
     <ClCompile Include="src\scenes\crosswindsscene.cpp" />
+    <ClCompile Include="src\texture.cpp" />
     <ClCompile Include="src\velocitysource.cpp" />
     <ClCompile Include="src\circularsource.cpp" />
     <ClCompile Include="src\camera.cpp" />
@@ -64,6 +65,7 @@
     <ClInclude Include="include\scenes\waterfountainscene.h" />
     <ClInclude Include="include\scenes\whirlwindscene.h" />
     <ClInclude Include="include\shaderprogram.h" />
+    <ClInclude Include="include\texture.h" />
     <ClInclude Include="include\ui\imguiui.h" />
     <ClInclude Include="include\ui\sceneselector.h" />
     <ClInclude Include="include\velocitysource.h" />
