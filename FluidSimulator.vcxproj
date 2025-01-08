@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="src\arrow.cpp" />
     <ClCompile Include="src\densitysource.cpp" />
+    <ClCompile Include="src\framebuffer.cpp" />
     <ClCompile Include="src\rectvelocitysource.cpp" />
     <ClCompile Include="src\scenes\waterfountainscene.cpp" />
     <ClCompile Include="src\scenes\whirlwindscene.cpp" />
@@ -53,6 +54,7 @@
     <ClInclude Include="include\camera.h" />
     <ClInclude Include="include\drawable.h" />
     <ClInclude Include="include\fluidsimulator.h" />
+    <ClInclude Include="include\framebuffer.h" />
     <ClInclude Include="include\glm_includes.h" />
     <ClInclude Include="include\mygl.h" />
     <ClInclude Include="include\quad.h" />
