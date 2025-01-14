@@ -7,8 +7,8 @@
 MyGL::MyGL(unsigned int windowWidth, unsigned int windowHeight): 
 	windowWidth(windowWidth), windowHeight(windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0), 
-    overlayShader(), quad(), testTextureHandle(-1), velocityTextureHandle(-1),
-    fluidSimulator(100, testTextureHandle, velocityTextureHandle),
+    overlayShader(), quad(), testTextureHandle(-1), velocityTextureHandle(-1), obstacleTextureHandle(-1),
+    fluidSimulator(100, testTextureHandle, velocityTextureHandle, obstacleTextureHandle),
     camera(windowWidth, windowHeight), sceneSelector(),
     velFieldShader(), arrow()
 {
@@ -18,7 +18,7 @@ MyGL::MyGL(unsigned int windowWidth, unsigned int windowHeight):
 MyGL::MyGL(const MyGL& other):
 	windowWidth(other.windowWidth), windowHeight(other.windowHeight), 
     window(nullptr), imguiContext(nullptr), vao(0),
-    overlayShader(), quad(), testTextureHandle(-1), velocityTextureHandle(-1),
+    overlayShader(), quad(), testTextureHandle(-1), velocityTextureHandle(-1), obstacleTextureHandle(-1),
     camera(windowWidth, windowHeight), sceneSelector(),
     velFieldShader(), arrow()
 {
@@ -75,6 +75,10 @@ bool MyGL::InitializeGL() {
 
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
+
+    // Enable alpha blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Create a Vertex Attribute Object
     glGenVertexArrays(1, &vao);
@@ -268,6 +272,8 @@ void MyGL::RenderTestImage()
         }
         RenderVelocityField();
     }
+
+    RenderObstacleTexture();
 }
 void MyGL::TestVelField() {
     if (velocityTextureHandle == -1) {
@@ -331,6 +337,39 @@ void MyGL::RenderVelocityField() {
     glDisable(GL_DEPTH_TEST);
     // TODO: Set this 100 * 100 to a var that's connected to the fluidism
     velFieldShader.DrawInstanced(arrow, 100 * 100);
+    glEnable(GL_DEPTH_TEST);
+}
+
+void MyGL::RenderObstacleTexture() {
+    // create and bind texture
+    if (obstacleTextureHandle == -1) {
+        const int textureWidth = 512;
+        const int textureHeight = 512;
+
+        // Generate and bind a texture
+        glGenTextures(2, &obstacleTextureHandle);
+        glBindTexture(GL_TEXTURE_2D, obstacleTextureHandle);
+
+        // Set texture parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        //Set fluid sim handle
+        fluidSimulator.SetObstacleTextureHandle(obstacleTextureHandle);
+    }
+
+    // render obstacle texture
+    overlayShader.useMe();
+
+    // Bind the texture for rendering
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, obstacleTextureHandle);
+    velFieldShader.SetUnifInt("u_Texture", 2);
+    glDisable(GL_DEPTH_TEST);
+    // TODO: Set this 100 * 100 to a var that's connected to the fluidism
+    overlayShader.Draw(quad);
     glEnable(GL_DEPTH_TEST);
 }
 

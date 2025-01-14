@@ -8,9 +8,9 @@
 #include "scenes/whirlwindscene.h"
 #include "scenes/waterfountainscene.h"
 
-FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle, GLuint velocityTextureHandle) :
+FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle, GLuint velocityTextureHandle, GLuint obstacleTextureHandle) :
 	N(N), diffusion(0.0001), viscosity(0), densityTextureHandle(densityTextureHandle), elemCount(N*N), densSources(),
-	velocityTextureHandle(velocityTextureHandle), scenes(), activeScene(nullptr)
+	velocityTextureHandle(velocityTextureHandle), scenes(), activeScene(nullptr), obstacleTextureHandle(obstacleTextureHandle)
 {
 	int gridSize = (N + 2) * (N + 2);
 	u.resize(gridSize);
@@ -19,6 +19,7 @@ FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle, GLui
 	v_prev.resize(gridSize);
 	dens.resize(gridSize);
 	dens_prev.resize(gridSize);
+	obstacle.resize(gridSize);
 
 	for (int x = 1; x <= N; ++x) {
 		for (int y = 1; y <= N; ++y) {
@@ -31,6 +32,13 @@ FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle, GLui
 			}
 
 			//u[IX(x, y)] = 1;
+		}
+	}
+	int minBound = ((N + 2) / 2) - 10;
+	int maxBound = ((N + 2) / 2) + 10;
+	for (int i = minBound; i <= maxBound; ++i) {
+		for (int j = minBound; j <= N / 2; ++j) {
+			obstacle[IX(i, j)] = true;
 		}
 	}
 
@@ -57,8 +65,6 @@ void FluidSimulator::Tick()
 	if (densityTextureHandle > 10) return;
 	double dt = 0.016;// ImGui::GetIO().DeltaTime;
 	//todo: fix hardcoded window size
-	int cursorX = ImGui::GetMousePos().x / 1200 * N;
-	int cursorY = (1 - ImGui::GetMousePos().y / 1200) * N;
 	//dens_prev[IX(cursorX, cursorY)] = 4;
 
 	VelStep(N, u, v, u_prev, v_prev, viscosity, dt);
@@ -67,22 +73,11 @@ void FluidSimulator::Tick()
 	if (velocityTextureHandle <= 10) {
 		UpdateVelocityTexture();
 	}
+	if (obstacleTextureHandle <= 10) {
+		UpdateObstacleTexture();
+	}
 
-	if (ImGui::IsMouseDragging(0) && !ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
-		ImVec2 dragVec = ImGui::GetMouseDragDelta(0);
-		// AddVel(cursorX, cursorY, dragVec.x, dragVec.y);
-		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N) {
-			AddDens(cursorX, cursorY, abs((dragVec.x + dragVec.y) * 100));
-		}
-	}
-	if (ImGui::IsMouseDragging(1) && !ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
-		ImVec2 dragVec = ImGui::GetMouseDragDelta(1);
-		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N) {
-			float dragStartX = cursorX - (dragVec.x / 1200 * N);
-			float dragStartY = cursorY - ((1 - dragVec.y) / 1200) * N;
-			AddVel(dragStartX, dragStartY, dragVec.x * 0.001, dragVec.y * -0.001);
-		}
-	}
+	HandleMouse();
 
 	for (int x = 1; x <= N; ++x) {
 		for (int y = 1; y <= N; y++) {
@@ -103,6 +98,43 @@ void FluidSimulator::Tick()
 	}*/
 }
 
+void FluidSimulator::HandleMouse() 
+{
+	int cursorX = ImGui::GetMousePos().x / 1200 * N;
+	int cursorY = (1 - ImGui::GetMousePos().y / 1200) * N;
+	// NOTE: LeftCtrl + Mouse is for camera handling
+	// NOTE: LeftShift + Mouse is for adding obstacles
+	if (ImGui::IsMouseDragging(0) && !ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && !ImGui::IsKeyDown(ImGuiKey_LeftShift)) {
+		ImVec2 dragVec = ImGui::GetMouseDragDelta(0);
+		// AddVel(cursorX, cursorY, dragVec.x, dragVec.y);
+		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N && !obstacle[IX(cursorX, cursorY)]) {
+			AddDens(cursorX, cursorY, abs((dragVec.x + dragVec.y) * 100));
+		}
+	}
+	if (ImGui::IsMouseDragging(1) && !ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && !ImGui::IsKeyDown(ImGuiKey_LeftShift)) {
+		ImVec2 dragVec = ImGui::GetMouseDragDelta(1);
+		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N) {
+			float dragStartX = cursorX - (dragVec.x / 1200 * N);
+			float dragStartY = cursorY - ((1 - dragVec.y) / 1200) * N;
+			AddVel(dragStartX, dragStartY, dragVec.x * 0.001, dragVec.y * -0.001);
+		}
+	}
+	// Add obstacles with left click and left shift
+	if (ImGui::IsKeyDown(ImGuiKey_LeftShift) && ImGui::IsMouseDown(0)) {
+		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N) {
+			obstacle[IX(cursorX, cursorY)] = true;
+			// also remove any density frozen by this obstacle
+			dens[IX(cursorX, cursorY)] = 0;
+		}
+	}
+	// Remove obstacles with right click and left shift
+	else if (ImGui::IsKeyDown(ImGuiKey_LeftShift) && ImGui::IsMouseDown(1)) {
+		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N) {
+			obstacle[IX(cursorX, cursorY)] = false;
+		}
+	}
+}
+
 GLuint FluidSimulator::GetDensityTextureHandle() const
 {
 	return densityTextureHandle;
@@ -111,6 +143,11 @@ GLuint FluidSimulator::GetDensityTextureHandle() const
 GLuint FluidSimulator::GetVelocityTextureHandle() const
 {
 	return velocityTextureHandle;
+}
+
+GLuint FluidSimulator::GetObstacleTextureHandle() const
+{
+	return obstacleTextureHandle;
 }
 
 void FluidSimulator::AddSource(int N, std::vector<double>& x, const std::vector<double>& s, double dT)
@@ -151,6 +188,9 @@ void FluidSimulator::Diffuse(int N, BoundaryType b, std::vector<double>& x, cons
 	for (k = 0; k < 20; k++) {
 		for (i = 1; i <= N; i++) {
 			for (j = 1; j <= N; j++) {
+				/*if (obstacle[IX(i, j)]) {
+					continue;
+				}*/
 				double initial = x[IX(i, j)];
 				double check = (x0[IX(i, j)] + a * (x[IX(i - 1, j)] + x[IX(i + 1, j)] +
 					x[IX(i, j - 1)] + x[IX(i, j + 1)])) / (1 + 4 * a);
@@ -170,6 +210,9 @@ void FluidSimulator::Advect(int N, BoundaryType b, std::vector<double>& d, const
 	dt0 = dt * N;
 	for (i = 1; i <= N; i++) {
 		for (j = 1; j <= N; j++) {
+			if (obstacle[IX(i, j)]) {
+				continue;
+			}
 			x = i - dt0 * u[IX(i, j)]; y = j - dt0 * v[IX(i, j)];
 			if (x < 0.5) x = 0.5; if (x > N + 0.5) x = N + 0.5; i0 = (int)x; i1 = i0 + 1;
 			if (y < 0.5) y = 0.5; if (y > N + 0.5) y = N + 0.5; j0 = (int)y; j1 = j0 + 1;
@@ -217,6 +260,9 @@ void FluidSimulator::Project(int N, std::vector<double>& u, std::vector<double>&
 	h = 1.0 / N;
 	for (i = 1; i <= N; i++) {
 		for (j = 1; j <= N; j++) {
+			/*if (boundary[IX(i, j)]) {
+				continue;
+			}*/
 			div[IX(i, j)] = -0.5 * h * (u[IX(i + 1, j)] - u[IX(i - 1, j)] +
 				v[IX(i, j + 1)] - v[IX(i, j - 1)]);
 			p[IX(i, j)] = 0;
@@ -226,6 +272,9 @@ void FluidSimulator::Project(int N, std::vector<double>& u, std::vector<double>&
 	for (k = 0; k < 1; k++) {
 		for (i = 1; i <= N; i++) {
 			for (j = 1; j <= N; j++) {
+				/*if (boundary[IX(i, j)]) {
+					continue;
+				}*/
 				p[IX(i, j)] = (div[IX(i, j)] + p[IX(i - 1, j)] + p[IX(i + 1, j)] +
 					p[IX(i, j - 1)] + p[IX(i, j + 1)]) / 4;
 			}
@@ -234,6 +283,9 @@ void FluidSimulator::Project(int N, std::vector<double>& u, std::vector<double>&
 	}
 	for (i = 1; i <= N; i++) {
 		for (j = 1; j <= N; j++) {
+			/*if (boundary[IX(i, j)]) {
+				continue;
+			}*/
 			u[IX(i, j)] -= 0.5 * (p[IX(i + 1, j)] - p[IX(i - 1, j)]) / h;
 			v[IX(i, j)] -= 0.5 * (p[IX(i, j + 1)] - p[IX(i, j - 1)]) / h;
 		}
@@ -251,6 +303,30 @@ void FluidSimulator::SetBoundaryConditions(int N, BoundaryType b, std::vector<do
 		x[IX(N + 1, i)] = b == BoundaryType::HORIZONTAL ? x[IX(N, i)] * -1 : x[IX(N, i)];
 		x[IX(i, 0)] = b == BoundaryType::VERTICAL ? x[IX(i, 1)] * -1 : x[IX(i, 1)];
 		x[IX(i, N + 1)] = b == BoundaryType::VERTICAL ? x[IX(i, N)] * -1 : x[IX(i, N)];
+		/*for (int j = 1; j <= N; ++j) {
+			if (boundary[IX(i, j)]) {
+				bool left = boundary[IX(i - 1, j)];
+				bool right = boundary[IX(i + i, j)];
+				bool up = boundary[IX(i, j + 1)];
+				bool down = boundary[IX(i, j - 1)];
+				if (b == BoundaryType::HORIZONTAL) {
+					if (!left) {
+						x[IX(i - 1, j)] *= -1;
+					}
+					if (!right) {
+						x[IX(i + 1, j)] *= -1;
+					}
+				}
+				else if (b == BoundaryType::VERTICAL) {
+					if (!up) {
+						x[IX(i, j + 1)] *= -1;
+					}
+					if (!down) {
+						x[IX(i, j - 1)] *= -1;
+					}
+				}
+			}
+		}*/
 	}
 	x[IX(0, 0)] = 0.5 * (x[IX(1, 0)] + x[IX(0, 1)]);
 	x[IX(0, N + 1)] = 0.5 * (x[IX(1, N + 1)] + x[IX(0, N)]);
@@ -324,6 +400,30 @@ void FluidSimulator::SetVelocityTextureHandle(GLuint handle) {
 	velocityTextureHandle = handle;
 }
 
+void FluidSimulator::UpdateObstacleTexture() {
+	std::vector<float> field(N * N * 4); // RGBA as doubles
+
+	for (int y = 1; y <= N; ++y) {
+		for (int x = 1; x <= N; ++x) {
+			float pixelObstacle = (obstacle[IX(x, y)]) ? 1.0 : 0.0;
+			int index = ((y - 1) * N + (x - 1)) * 4;
+			field[index] = 0;
+			field[index + 1] = 0;
+			field[index + 2] = pixelObstacle;
+			field[index + 3] = pixelObstacle * 0.25;
+		}
+	}
+
+	//todo:: send to gpu. better ways to do this
+	glBindTexture(GL_TEXTURE_2D, obstacleTextureHandle);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, N, N, 0, GL_RGBA, GL_FLOAT, field.data());
+	glBindTexture(GL_TEXTURE_2D, 2);
+}
+
+void FluidSimulator::SetObstacleTextureHandle(GLuint handle) {
+	obstacleTextureHandle = handle;
+}
+
 std::vector<std::string> FluidSimulator::GetSceneNames() const
 {
 	// Create a vector and populate it with scene names by iterating through the map 
@@ -376,4 +476,5 @@ void FluidSimulator::Reset()
 	v_prev.assign(gridSize, 0.0);
 	dens.assign(gridSize, 0.0);
 	dens_prev.assign(gridSize, 0.0);
+	obstacle.assign(gridSize, false);
 }
