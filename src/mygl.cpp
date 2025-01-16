@@ -265,11 +265,12 @@ void MyGL::RenderTestImage()
     overlayShader.Draw(quad);
     glEnable(GL_DEPTH_TEST);
 
+    if (ImGui::IsKeyDown(ImGuiKey_C)) {
+        glDisable(GL_BLEND);
+        TestVelField();
+        glEnable(GL_BLEND);
+    }
     if (ImGui::IsKeyDown(ImGuiKey_V)) {
-        
-        if (ImGui::IsKeyDown(ImGuiKey_LeftShift)) {
-            TestVelField();
-        }
         RenderVelocityField();
     }
 

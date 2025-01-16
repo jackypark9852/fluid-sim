@@ -123,8 +123,10 @@ void FluidSimulator::HandleMouse()
 	if (ImGui::IsKeyDown(ImGuiKey_LeftShift) && ImGui::IsMouseDown(0)) {
 		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N) {
 			obstacle[IX(cursorX, cursorY)] = true;
-			// also remove any density frozen by this obstacle
+			// also remove any density and velocity frozen by this obstacle
 			dens[IX(cursorX, cursorY)] = 0;
+			u[IX(cursorX, cursorY)] = 0;
+			v[IX(cursorX, cursorY)] = 0;
 		}
 	}
 	// Remove obstacles with right click and left shift
@@ -188,9 +190,6 @@ void FluidSimulator::Diffuse(int N, BoundaryType b, std::vector<double>& x, cons
 	for (k = 0; k < 20; k++) {
 		for (i = 1; i <= N; i++) {
 			for (j = 1; j <= N; j++) {
-				/*if (obstacle[IX(i, j)]) {
-					continue;
-				}*/
 				double initial = x[IX(i, j)];
 				double check = (x0[IX(i, j)] + a * (x[IX(i - 1, j)] + x[IX(i + 1, j)] +
 					x[IX(i, j - 1)] + x[IX(i, j + 1)])) / (1 + 4 * a);
@@ -260,9 +259,6 @@ void FluidSimulator::Project(int N, std::vector<double>& u, std::vector<double>&
 	h = 1.0 / N;
 	for (i = 1; i <= N; i++) {
 		for (j = 1; j <= N; j++) {
-			/*if (boundary[IX(i, j)]) {
-				continue;
-			}*/
 			div[IX(i, j)] = -0.5 * h * (u[IX(i + 1, j)] - u[IX(i - 1, j)] +
 				v[IX(i, j + 1)] - v[IX(i, j - 1)]);
 			p[IX(i, j)] = 0;
@@ -272,9 +268,6 @@ void FluidSimulator::Project(int N, std::vector<double>& u, std::vector<double>&
 	for (k = 0; k < 1; k++) {
 		for (i = 1; i <= N; i++) {
 			for (j = 1; j <= N; j++) {
-				/*if (boundary[IX(i, j)]) {
-					continue;
-				}*/
 				p[IX(i, j)] = (div[IX(i, j)] + p[IX(i - 1, j)] + p[IX(i + 1, j)] +
 					p[IX(i, j - 1)] + p[IX(i, j + 1)]) / 4;
 			}
@@ -283,9 +276,6 @@ void FluidSimulator::Project(int N, std::vector<double>& u, std::vector<double>&
 	}
 	for (i = 1; i <= N; i++) {
 		for (j = 1; j <= N; j++) {
-			/*if (boundary[IX(i, j)]) {
-				continue;
-			}*/
 			u[IX(i, j)] -= 0.5 * (p[IX(i + 1, j)] - p[IX(i - 1, j)]) / h;
 			v[IX(i, j)] -= 0.5 * (p[IX(i, j + 1)] - p[IX(i, j - 1)]) / h;
 		}
@@ -303,30 +293,6 @@ void FluidSimulator::SetBoundaryConditions(int N, BoundaryType b, std::vector<do
 		x[IX(N + 1, i)] = b == BoundaryType::HORIZONTAL ? x[IX(N, i)] * -1 : x[IX(N, i)];
 		x[IX(i, 0)] = b == BoundaryType::VERTICAL ? x[IX(i, 1)] * -1 : x[IX(i, 1)];
 		x[IX(i, N + 1)] = b == BoundaryType::VERTICAL ? x[IX(i, N)] * -1 : x[IX(i, N)];
-		/*for (int j = 1; j <= N; ++j) {
-			if (boundary[IX(i, j)]) {
-				bool left = boundary[IX(i - 1, j)];
-				bool right = boundary[IX(i + i, j)];
-				bool up = boundary[IX(i, j + 1)];
-				bool down = boundary[IX(i, j - 1)];
-				if (b == BoundaryType::HORIZONTAL) {
-					if (!left) {
-						x[IX(i - 1, j)] *= -1;
-					}
-					if (!right) {
-						x[IX(i + 1, j)] *= -1;
-					}
-				}
-				else if (b == BoundaryType::VERTICAL) {
-					if (!up) {
-						x[IX(i, j + 1)] *= -1;
-					}
-					if (!down) {
-						x[IX(i, j - 1)] *= -1;
-					}
-				}
-			}
-		}*/
 	}
 	x[IX(0, 0)] = 0.5 * (x[IX(1, 0)] + x[IX(0, 1)]);
 	x[IX(0, N + 1)] = 0.5 * (x[IX(1, N + 1)] + x[IX(0, N)]);
@@ -410,7 +376,7 @@ void FluidSimulator::UpdateObstacleTexture() {
 			field[index] = 0;
 			field[index + 1] = 0;
 			field[index + 2] = pixelObstacle;
-			field[index + 3] = pixelObstacle * 0.25;
+			field[index + 3] = pixelObstacle * 0.5;
 		}
 	}
 
