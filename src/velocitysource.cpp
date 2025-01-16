@@ -5,6 +5,11 @@ VelocitySource::VelocitySource(unsigned int N, double uVel, double vVel):
     uVel(uVel), vVel(vVel)
 {}
 
+VelocitySource::VelocitySource(unsigned int N, std::vector<double> uVec, std::vector<double> vVec):
+    N(N), u(uVec), v(vVec), uVel(0), vVel(0)
+{}
+
+
 void VelocitySource::Tick()
 {
     return;
