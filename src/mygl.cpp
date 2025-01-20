@@ -166,6 +166,9 @@ void MyGL::ShowImGuiWindow()
     }
 
     sceneSelector.ShowUI();
+    //ImGui::ShowDemoWindow();
+    //ImVec4 color = ImVec4(114.0f / 255.0f, 144.0f / 255.0f, 154.0f / 255.0f, 200.0f / 255.0f);
+    ImGui::ColorEdit4("MyColor##2f", (float*)&fluidSimulator.obstColor, ImGuiColorEditFlags_Float);
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
         1000.0 / (double)(ImGui::GetIO().Framerate), (double)(ImGui::GetIO().Framerate));
     ImGui::End();

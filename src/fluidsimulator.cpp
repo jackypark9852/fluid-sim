@@ -10,7 +10,8 @@
 
 FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle, GLuint velocityTextureHandle, GLuint obstacleTextureHandle) :
 	N(N), diffusion(0.0001), viscosity(0), densityTextureHandle(densityTextureHandle), elemCount(N*N), densSources(),
-	velocityTextureHandle(velocityTextureHandle), scenes(), activeScene(nullptr), obstacleTextureHandle(obstacleTextureHandle)
+	velocityTextureHandle(velocityTextureHandle), scenes(), activeScene(nullptr), obstacleTextureHandle(obstacleTextureHandle),
+	obstColor(ImVec4(0, 0, 1, 0.5))
 {
 	int gridSize = (N + 2) * (N + 2);
 	u.resize(gridSize);
@@ -20,6 +21,7 @@ FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle, GLui
 	dens.resize(gridSize);
 	dens_prev.resize(gridSize);
 	obstacle.resize(gridSize);
+	obstacleColor.resize(gridSize);
 
 	for (int x = 1; x <= N; ++x) {
 		for (int y = 1; y <= N; ++y) {
@@ -32,13 +34,6 @@ FluidSimulator::FluidSimulator(unsigned int N, GLuint densityTextureHandle, GLui
 			}
 
 			//u[IX(x, y)] = 1;
-		}
-	}
-	int minBound = ((N + 2) / 2) - 10;
-	int maxBound = ((N + 2) / 2) + 10;
-	for (int i = minBound; i <= maxBound; ++i) {
-		for (int j = minBound; j <= N / 2; ++j) {
-			obstacle[IX(i, j)] = true;
 		}
 	}
 
@@ -122,7 +117,8 @@ void FluidSimulator::HandleMouse()
 	// Add obstacles with left click and left shift
 	if (ImGui::IsKeyDown(ImGuiKey_LeftShift) && ImGui::IsMouseDown(0)) {
 		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N) {
-			obstacle[IX(cursorX, cursorY)] = true;
+			glm::vec4 col(obstColor.x, obstColor.y, obstColor.z, obstColor.w);
+			ToggleObs(cursorX, cursorY, true, col);
 			// also remove any density and velocity frozen by this obstacle
 			dens[IX(cursorX, cursorY)] = 0;
 			u[IX(cursorX, cursorY)] = 0;
@@ -132,7 +128,7 @@ void FluidSimulator::HandleMouse()
 	// Remove obstacles with right click and left shift
 	else if (ImGui::IsKeyDown(ImGuiKey_LeftShift) && ImGui::IsMouseDown(1)) {
 		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N) {
-			obstacle[IX(cursorX, cursorY)] = false;
+			ToggleObs(cursorX, cursorY, false, glm::vec4(0));
 		}
 	}
 }
@@ -180,6 +176,12 @@ void FluidSimulator::AddDens(int x, int y, float amt) {
 void FluidSimulator::AddVel(int x, int y, float amtX, float amtY) {
 	u[IX(x, y)] += amtX;
 	v[IX(x, y)] += amtY;
+}
+
+
+void FluidSimulator::ToggleObs(int x, int y, bool isObs, glm::vec4 color) {
+	obstacle[IX(x, y)] = isObs;
+	obstacleColor[IX(x, y)] = color;
 }
 
 void FluidSimulator::Diffuse(int N, BoundaryType b, std::vector<double>& x, const std::vector<double>& x0, double diff, double dt)
@@ -371,12 +373,20 @@ void FluidSimulator::UpdateObstacleTexture() {
 
 	for (int y = 1; y <= N; ++y) {
 		for (int x = 1; x <= N; ++x) {
-			float pixelObstacle = (obstacle[IX(x, y)]) ? 1.0 : 0.0;
 			int index = ((y - 1) * N + (x - 1)) * 4;
-			field[index] = 0;
-			field[index + 1] = 0;
-			field[index + 2] = pixelObstacle;
-			field[index + 3] = pixelObstacle * 0.5;
+			if (obstacle[IX(x, y)]) {
+				glm::vec4 col = obstacleColor[IX(x, y)];
+				field[index] = col.x;
+				field[index + 1] = col.y;
+				field[index + 2] = col.z;
+				field[index + 3] = col.w;
+			}
+			else {
+				field[index] = 0;
+				field[index + 1] = 0;
+				field[index + 2] = 0;
+				field[index + 3] = 0;
+			}	
 		}
 	}
 
@@ -443,4 +453,5 @@ void FluidSimulator::Reset()
 	dens.assign(gridSize, 0.0);
 	dens_prev.assign(gridSize, 0.0);
 	obstacle.assign(gridSize, false);
+	obstacleColor.assign(gridSize, glm::vec4(0));
 }
