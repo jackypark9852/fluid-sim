@@ -38,6 +38,9 @@ private:
     // Texture representing the velocity field as an rgb image corresponding to xyz vals
     GLuint velocityTextureHandle;
 
+    // Texture representing the obstacles as a blue
+    GLuint obstacleTextureHandle;
+
     // Horizontal velocity components of the fluid at the current time step
     std::vector<double> u;
 
@@ -55,6 +58,9 @@ private:
 
     // Density values of the fluid at the previous time step
     std::vector<double> dens_prev;
+
+    // Vector storing whether grid location has an obstacle or not
+    std::vector<bool> obstacle;
 
     // Density sources present in the current simulation 
     std::vector<DensitySource> densSources; 
@@ -191,6 +197,11 @@ private:
     void UpdateVelocityTexture();
 
     /// <summary>
+    /// Updates the OpenGL texture with the current obstacle values.
+    /// </summary>
+    void UpdateObstacleTexture();
+
+    /// <summary>
     /// Initializes the set of availible scenes for the fluid simulator. 
     /// At any time, one of these scenes will be selected using tehe SceneSelector UI component, 
     /// and the selection will be passed onto the FluidSimulator.
@@ -204,7 +215,8 @@ public:
     /// including boundary cells.
     /// </summary>
     /// <param name="N">The width (and height) of the inner grid, excluding boundary cells. Defaults to 100.</param>
-    FluidSimulator(unsigned int N = 100, GLuint densityTextureHandle = -1, GLuint velocityTextureHandle = -1);
+    FluidSimulator(unsigned int N = 100, GLuint densityTextureHandle = -1, GLuint velocityTextureHandle = -1,
+        GLuint obstacleTextureHandle = -1);
 
     /// <summary>
     /// Gets the current horizontal velocity components of the fluid.
@@ -230,6 +242,11 @@ public:
     void Tick();
 
     /// <summary>
+    ///  Handles mouse events to reduce clutter in Tick()
+    /// </summary>
+    void HandleMouse();
+
+    /// <summary>
     /// Retrieves the OpenGL texture handle for the density field.
     /// </summary>
     /// <returns>The OpenGL texture handle associated with the density field.</returns>
@@ -252,6 +269,18 @@ public:
     /// </summary>
     /// <param name="handle"></param> handle
     void SetVelocityTextureHandle(GLuint handle);
+
+    /// <summary>
+    /// Set obstacle gl handle
+    /// </summary>
+    /// <param name="handle"></param> handle
+    void SetObstacleTextureHandle(GLuint handle);
+
+    /// <summary>
+    /// Retrieves the OpenGL texture handle for the obstacles.
+    /// </summary>
+    /// <returns>The OpenGL texture handle associated with the obstacles.</returns>
+    GLuint GetObstacleTextureHandle() const;
 
     /// <summary>
     /// Retrieves a vector containing string literals of the scenes in the simulation. 
