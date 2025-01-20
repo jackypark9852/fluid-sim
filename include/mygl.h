@@ -35,6 +35,7 @@ private:
 	Arrow arrow; /// <summary> An arrow used for the velocity field display </summary>
 	GLuint testTextureHandle; /// <summary> The handle for the test texture created in RenderTestTexture() </summary>
 	GLuint velocityTextureHandle; /// <summary> The handle for the velocity field texture created in RenderVelocityField() </summary>
+	GLuint obstacleTextureHandle; /// <summary> The handle for the obstacle texture created in RenderObstacleTexture() </summary>
 	FluidSimulator fluidSimulator;
 	
 	SceneSelector sceneSelector; /// <summary> An ImGui UI element for selecting the currently active scene in the simulationJKO </summary>
@@ -101,6 +102,11 @@ public:
 	/// Uses the velField shader program to render a velocity field
 	/// </summary>
 	void RenderVelocityField();
+
+	/// <summary>
+	/// Uses the overlay shader program to render the obstacles
+	/// </summary>
+	void RenderObstacleTexture();
 
 	/// <summary>
 	/// Displays the velocity field's normal map
