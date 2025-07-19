@@ -1,24 +1,33 @@
 #include "scenes/whirlwindscene.h"
 #include "circularsource.h"
 #include "rectvelocitysource.h"
+#include <glm/gtx/rotate_vector.hpp>
 
 WhirlwindScene::WhirlwindScene(unsigned int N, const std::string& name) :
 	Scene(N, name)
 {
 	// Add two circular density sources that will simulate a swirling vortex
 	// Source 1: Positioned near the center of the grid
-	densSources.push_back(CircularSource(N, N / 2, N / 2, 20, 100));
+	// densSources.push_back(CircularSource(N, N / 2, N / 2, 20, 100));
 
 	// Source 2: Positioned slightly above and to the right of the center
 	densSources.push_back(CircularSource(N, N / 2 + 20, N / 2 - 20, 10, 50));
 
-	// Add three rectangular velocity sources to create the whirlpool effect
-	// Velocity Source 1: A clockwise rotation near the center to simulate swirling
-	velSources.push_back(RectVelocitySource(N, 30, 30, N / 2 - 20, N / 2 - 20, 0.1, 0.1));
+	std::vector<double> xVel((N + 2) * (N + 2), 0.0);
+	std::vector<double> yVel((N + 2) * (N + 2), 0.0);
+	for (int i = 1; i <= N; ++i) {
+		for (int j = 1; j <= N; ++j) {
+			double xCentered = i - (N + 2) * 0.5;
+			double yCentered = j - (N + 2) * 0.5;
+			double scalar = 0.002;
+			glm::vec3 vel(-yCentered, xCentered, 0);
+			vel *= scalar;
+			vel = glm::rotateZ(vel, glm::radians(80.f));
+			xVel[IX(i, j)] = vel.x;
+			yVel[IX(i, j)] = vel.y;
+			
+		}
+	}
 
-	// Velocity Source 2: A smaller force pushing particles outward from the center
-	velSources.push_back(RectVelocitySource(N, 40, 40, N / 2 - 10, N / 2 - 10, -0.05, -0.05));
-
-	// Velocity Source 3: A tangential force to reinforce the swirling movement
-	velSources.push_back(RectVelocitySource(N, 30, 30, N / 2 + 50, N / 2, 0.1, -0.1));
+	velSources.push_back(VelocitySource(N, xVel, yVel));
 }

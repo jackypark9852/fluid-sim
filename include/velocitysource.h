@@ -56,6 +56,15 @@ public:
     VelocitySource(unsigned int N, double uVel, double vVel);
 
     /// <summary>
+    /// Constructs a velocity source that dynamically adds velocity to the simulation
+    /// based on the specified x and y velocity vector grids.
+    /// </summary>
+    /// <param name="N">The width of the inner grid (excluding boundaries).</param>
+    /// <param name="uVec">The vector of x velocities to be added to the grid.</param>
+    /// <param name="vVec">The vector of y velocities to be added to the grid.</param>
+    VelocitySource(unsigned int N, std::vector<double> uVec, std::vector<double> vVec);
+
+    /// <summary>
     /// Updates the source arrays dynamically each physics frame.
     /// This function should be overridden by derived classes to implement specific behavior.
     /// </summary>

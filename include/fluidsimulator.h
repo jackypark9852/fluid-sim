@@ -62,6 +62,9 @@ private:
     // Vector storing whether grid location has an obstacle or not
     std::vector<bool> obstacle;
 
+    // Vector storing the RGBA values of the obstacle at this location
+    std::vector<glm::vec4> obstacleColor;
+
     // Density sources present in the current simulation 
     std::vector<DensitySource> densSources; 
     
@@ -116,6 +119,14 @@ private:
     /// <param name="amtX"></param>
     /// <param name="amtY"></param>
     void AddVel(int x, int y, float amtX, float amtY);
+
+    /// <summary>
+    /// Toggles the obstacle at (x, y) with color color;
+    /// </summary>
+    /// <param name="x">x-coord</param>
+    /// <param name="y">y-coord</param>
+    /// <param name="color">color as RGBA</param>
+    void ToggleObs(int x, int y, bool isObs, glm::vec4 color);
 
     /// <summary>
     /// Diffuses the scalar field over the grid, spreading values according to the diffusion coefficient.
@@ -235,6 +246,11 @@ public:
     /// </summary>
     /// <returns>A constant reference to the vector representing the fluid densities.</returns>
     const std::vector<double>& GetDens() const;
+
+    /// <summary>
+    /// The color of the obstacle we are drawing
+    /// </summary>
+    ImVec4 obstColor;
 
     /// <summary>
     /// Advances the simulation by one time step, performing all necessary updates to the fluid's state.
