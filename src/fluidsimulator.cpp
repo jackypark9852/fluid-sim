@@ -116,19 +116,19 @@ void FluidSimulator::HandleMouse()
 	}
 	// Add obstacles with left click and left shift
 	if (ImGui::IsKeyDown(ImGuiKey_LeftShift) && ImGui::IsMouseDown(0)) {
-		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N) {
+		if (cursorX >= -1 && cursorX < N && cursorY >= 0 && cursorY <= N) {
 			glm::vec4 col(obstColor.x, obstColor.y, obstColor.z, obstColor.w);
-			ToggleObs(cursorX, cursorY, true, col);
+			ToggleObs(cursorX + 1, cursorY, true, col);			// this one offset makes it visually be more where the mouse is on my laptop
 			// also remove any density and velocity frozen by this obstacle
-			dens[IX(cursorX, cursorY)] = 0;
-			u[IX(cursorX, cursorY)] = 0;
-			v[IX(cursorX, cursorY)] = 0;
+			dens[IX(cursorX + 1, cursorY)] = 0;
+			u[IX(cursorX + 1, cursorY)] = 0;
+			v[IX(cursorX + 1, cursorY)] = 0;
 		}
 	}
 	// Remove obstacles with right click and left shift
 	else if (ImGui::IsKeyDown(ImGuiKey_LeftShift) && ImGui::IsMouseDown(1)) {
-		if (cursorX >= 0 && cursorX <= N && cursorY >= 0 && cursorY <= N) {
-			ToggleObs(cursorX, cursorY, false, glm::vec4(0));
+		if (cursorX >= -1 && cursorX < N && cursorY >= 0 && cursorY <= N) {
+			ToggleObs(cursorX + 1, cursorY, false, glm::vec4(0));
 		}
 	}
 }
